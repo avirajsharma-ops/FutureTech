@@ -192,12 +192,22 @@ export default function HeroScene({
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Resolve cached model URL (for the homepage hand-off path).
+  // Resolve cached model URL (for the homepage hand-off path) and
+  // pre-warm drei's GLTF cache for that exact URL so subsequent mounts
+  // (e.g. the page-exit overlay) get the model synchronously and don't
+  // re-suspend mid-transition (which would cause the model to pop in
+  // at a different visual size).
   useEffect(() => {
     if (modelUrlProp) return
     let isMounted = true
     heroModelPromise.then((cachedUrl) => {
-      if (isMounted) setModelUrl(cachedUrl)
+      if (!isMounted) return
+      setModelUrl(cachedUrl)
+      try {
+        useGLTF.preload(cachedUrl)
+      } catch {
+        // ignore — preload is best-effort
+      }
     })
     return () => {
       isMounted = false

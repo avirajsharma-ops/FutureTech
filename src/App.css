@@ -47,15 +47,6 @@
   will-change: transform;
 }
 
-/* Suppress the 3D canvas inside the exit overlay. A freshly-mounted
-   second WebGL canvas would reload the model and re-measure its size
-   inside the actively-scaling parent, causing the model to visibly
-   pop / resize mid-animation. The page background, hero gradient and
-   headline copy are enough to read the slide-up transition. */
-.page-exit-overlay .hero-canvas-wrap {
-  display: none;
-}
-
 .hero-section {
   position: relative;
   height: 100vh;
