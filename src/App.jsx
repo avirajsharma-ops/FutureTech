@@ -23,7 +23,6 @@ export default function App() {
   // The location we render INSIDE the loader (the page being lifted away).
   const [prevLocation, setPrevLocation] = useState(null)
   const [transitioning, setTransitioning] = useState(false)
-  const [routeReady, setRouteReady] = useState(true)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -35,22 +34,10 @@ export default function App() {
     if (location.pathname !== displayLocation.pathname) {
       setPrevLocation(displayLocation)
       setDisplayLocation(location)
-      setRouteReady(false)
       setTransitioning(true)
       window.scrollTo({ top: 0, behavior: 'instant' })
     }
   }, [location, displayLocation])
-
-  // Signal the loader once the new route has had a chance to paint.
-  useEffect(() => {
-    if (transitioning && !routeReady) {
-      const id1 = requestAnimationFrame(() => {
-        const id2 = requestAnimationFrame(() => setRouteReady(true))
-        return () => cancelAnimationFrame(id2)
-      })
-      return () => cancelAnimationFrame(id1)
-    }
-  }, [transitioning, routeReady])
 
   const handleComplete = useCallback(() => {
     setTransitioning(false)
@@ -81,7 +68,6 @@ export default function App() {
       {transitioning && (
         <TransitionLoader
           onComplete={handleComplete}
-          ready={routeReady}
           previousPage={
             prevLocation ? (
               <Routes location={prevLocation}>
