@@ -36,13 +36,13 @@ export default function App() {
       const snapshot = displayLocation
       setTransitioning(true) // header begins fading out
 
-      // Wait for the header fade (~350ms) before covering the screen.
+      // Wait for the header fade (~180ms) before covering the screen.
       const id = setTimeout(() => {
         setPrevLocation(snapshot)
         setDisplayLocation(location)
         setLoaderVisible(true)
         window.scrollTo({ top: 0, behavior: 'instant' })
-      }, 350)
+      }, 180)
       return () => clearTimeout(id)
     }
   }, [location, displayLocation])
