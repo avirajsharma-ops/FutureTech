@@ -1,0 +1,163 @@
+/* ───────────────────────────────────────────────────────────
+   Liquid Glass — shared design system
+   Inspired by macOS / iOS 26 "Liquid Glass" UI.
+
+   Apply `.liquid-glass` to any pill, button, card, or surface.
+   Optional modifiers:
+     .liquid-glass--pill      → round pill (default)
+     .liquid-glass--card      → 18px radius card
+     .liquid-glass--circle    → perfect circle
+     .liquid-glass--strong    → heavier blur for floating panels
+   ─────────────────────────────────────────────────────────── */
+
+:root {
+  --lg-radius: 999px;
+  --lg-radius-card: 18px;
+  --lg-blur: 22px;
+  --lg-blur-strong: 32px;
+  --lg-saturation: 180%;
+
+  /* Light theme glass tint */
+  --lg-tint: rgba(255, 255, 255, 0.55);
+  --lg-tint-edge: rgba(255, 255, 255, 0.85);
+  --lg-tint-bottom: rgba(255, 255, 255, 0.18);
+  --lg-border: rgba(255, 255, 255, 0.55);
+  --lg-highlight: rgba(255, 255, 255, 0.85);
+  --lg-text: #0a0a0a;
+}
+
+:root[data-theme='dark'] {
+  --lg-tint: rgba(28, 28, 32, 0.45);
+  --lg-tint-edge: rgba(255, 255, 255, 0.18);
+  --lg-tint-bottom: rgba(0, 0, 0, 0.28);
+  --lg-border: rgba(255, 255, 255, 0.14);
+  --lg-highlight: rgba(255, 255, 255, 0.35);
+  --lg-text: #f4f4f4;
+}
+
+/* ─── Core glass surface ─── */
+.liquid-glass {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--lg-radius);
+  color: var(--lg-text);
+  background: linear-gradient(
+      180deg,
+      var(--lg-tint-edge) 0%,
+      var(--lg-tint) 22%,
+      var(--lg-tint) 78%,
+      var(--lg-tint-bottom) 100%
+    );
+  border: 1px solid var(--lg-border);
+
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturation));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturation));
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              background 200ms ease;
+}
+
+/* ─── Refraction layer (SVG displacement on backdrop) ─── */
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  backdrop-filter: url(#liquid-glass-distortion) blur(2px);
+  -webkit-backdrop-filter: blur(2px); /* Safari fallback */
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* ─── Top-light highlight streak ─── */
+.liquid-glass::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 8%;
+  right: 8%;
+  height: 45%;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  filter: blur(6px);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.85;
+}
+
+:root[data-theme='dark'] .liquid-glass::after {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  opacity: 0.6;
+}
+
+/* ─── Modifiers ─── */
+.liquid-glass--card {
+  border-radius: var(--lg-radius-card);
+}
+
+.liquid-glass--circle {
+  border-radius: 50%;
+}
+
+.liquid-glass--strong {
+  backdrop-filter: blur(var(--lg-blur-strong)) saturate(var(--lg-saturation));
+  -webkit-backdrop-filter: blur(var(--lg-blur-strong)) saturate(var(--lg-saturation));
+}
+
+/* ─── Interactive state (button-like) ─── */
+.liquid-glass-button {
+  cursor: pointer;
+  user-select: none;
+  font: inherit;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.liquid-glass-button:hover {
+  transform: translateY(-1px);
+}
+
+.liquid-glass-button:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.liquid-glass-button:focus-visible {
+  outline: 2px solid var(--lg-text);
+  outline-offset: 3px;
+}
+
+/* ─── Liquid shimmer animation ─── */
+@keyframes liquid-shimmer {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+.liquid-glass--animated::after {
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.0) 0%,
+    rgba(255, 255, 255, 0.45) 30%,
+    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0.35) 75%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  background-size: 200% 100%;
+  animation: liquid-shimmer 6s ease-in-out infinite;
+  filter: blur(8px);
+}
+
+/* ─── Touch target safety ─── */
+@media (max-width: 768px) {
+  .liquid-glass-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

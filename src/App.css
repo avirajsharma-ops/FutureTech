@@ -1,0 +1,193 @@
+.home-page {
+  min-height: 100vh;
+}
+
+.hero-section {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 10%, var(--hero-glow), transparent 55%),
+    var(--bg);
+}
+
+.hero-section.is-loading .hero-canvas-wrap,
+.hero-section.is-loading .hero-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-content: center;
+  place-items: center;
+  gap: 0.55rem;
+  background:
+    radial-gradient(circle at 50% 20%, var(--hero-glow), transparent 54%),
+    var(--bg);
+  text-align: center;
+}
+
+.loading-brand {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.loading-screen h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.5vw, 2.1rem);
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.loading-label,
+.loading-pct {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.loading-track {
+  width: min(70vw, 340px);
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 15%, transparent);
+  overflow: hidden;
+}
+
+.loading-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--text);
+  transition: width 240ms ease;
+}
+
+/* ─── Canvas wrap ─── */
+.hero-canvas-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  cursor: grab;
+  touch-action: none;
+}
+
+.hero-canvas-wrap:active {
+  cursor: grabbing;
+}
+
+.hero-canvas-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.hero-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  padding: 9rem 2rem 3rem;
+  background: linear-gradient(to top, var(--bg) 28%, rgba(0, 0, 0, 0) 100%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero-overlay h1 {
+  margin: 0.65rem auto 0;
+  max-width: 18ch;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.tagline {
+  margin: 0.8rem auto 0;
+  max-width: 52ch;
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ── Tablet ──────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero-overlay {
+    padding: 8rem 2.5rem 2.5rem;
+  }
+
+  .hero-overlay h1 {
+    font-size: clamp(1.65rem, 3.8vw, 3.6rem);
+  }
+
+  .tagline {
+    font-size: clamp(0.88rem, 1.4vw, 1.05rem);
+  }
+}
+
+/* ── Mobile landscape / large phone ──────── */
+@media (max-width: 768px) {
+  .hero-overlay {
+    padding: 6rem 1.5rem 2rem;
+    background: linear-gradient(to top, var(--bg) 36%, rgba(0, 0, 0, 0) 100%);
+  }
+
+  .hero-overlay h1 {
+    font-size: clamp(1.55rem, 6.5vw, 2.6rem);
+    max-width: 16ch;
+    line-height: 1.1;
+  }
+
+  .tagline {
+    font-size: clamp(0.82rem, 3.2vw, 1rem);
+    max-width: 36ch;
+  }
+
+  .loading-screen h2 {
+    font-size: clamp(1.1rem, 5vw, 1.6rem);
+  }
+
+  .loading-track {
+    width: min(80vw, 280px);
+  }
+}
+
+/* ── Small mobile ────────────────────────── */
+@media (max-width: 480px) {
+  .hero-overlay {
+    padding: 5rem 1.25rem 1.75rem;
+    background: linear-gradient(to top, var(--bg) 40%, rgba(0, 0, 0, 0) 100%);
+  }
+
+  .hero-overlay h1 {
+    font-size: clamp(1.4rem, 7.5vw, 2.2rem);
+    max-width: 14ch;
+  }
+
+  .tagline {
+    font-size: clamp(0.78rem, 3.6vw, 0.95rem);
+    max-width: 30ch;
+  }
+
+  .eyebrow {
+    font-size: 0.65rem;
+  }
+}
