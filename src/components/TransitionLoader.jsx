@@ -1,29 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 
-export default function Loader({ onComplete }) {
+/**
+ * Page-switch loader using the EXACT original loader animation.
+ * Counter rises to ~90% over a minimum duration, then completes to 100%
+ * once `ready` is true (parent signals when the new route has mounted).
+ */
+export default function TransitionLoader({ onCovered, onComplete, ready }) {
   const [count, setCount] = useState(0)
   const [done, setDone] = useState(false)
-  const readyRef = useRef(
-    typeof document !== 'undefined' && document.readyState === 'complete'
-  )
+  const readyRef = useRef(ready)
 
-  // Mark ready when the page has actually finished loading.
   useEffect(() => {
-    if (readyRef.current) return
-    const onLoad = () => {
-      readyRef.current = true
-    }
-    window.addEventListener('load', onLoad)
-    return () => window.removeEventListener('load', onLoad)
-  }, [])
+    readyRef.current = ready
+  }, [ready])
 
-  // Drive the counter: ease to 90% over a minimum duration, hold,
-  // then complete to 100% once the page is ready.
   useEffect(() => {
+    onCovered?.()
     const start = performance.now()
-    const minDuration = 1600
-    const finishDuration = 400
+    const minDuration = 900
+    const finishDuration = 300
     let raf = 0
     let finishStart = null
 
@@ -44,12 +40,12 @@ export default function Loader({ onComplete }) {
       if (target < 100) {
         raf = requestAnimationFrame(tick)
       } else {
-        setTimeout(() => setDone(true), 350)
+        setTimeout(() => setDone(true), 250)
       }
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [])
+  }, [onCovered])
 
   return (
     <AnimatePresence onExitComplete={onComplete}>
@@ -58,21 +54,26 @@ export default function Loader({ onComplete }) {
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 9999,
+            zIndex: 9998,
             transformOrigin: 'center center',
             overflow: 'hidden',
           }}
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ scale: 1, y: 0, borderRadius: 0 }}
+          exit={{
+            scale: 0.82,
+            y: '-110%',
+            borderRadius: 32,
+          }}
           transition={{
-            duration: 0.9,
-            ease: [0.65, 0, 0.35, 1],
+            duration: 1.4,
+            ease: [0.76, 0, 0.24, 1],
+            scale: { duration: 0.7, ease: [0.65, 0, 0.35, 1] },
+            y: { duration: 1.2, ease: [0.76, 0, 0.24, 1], delay: 0.5 },
+            borderRadius: { duration: 0.7, ease: [0.65, 0, 0.35, 1] },
           }}
         >
-          {/* Background — matches light theme pearl white */}
           <div style={{ position: 'absolute', inset: 0, background: 'var(--bg)' }} />
 
-          {/* Counter + label */}
           <div
             style={{
               position: 'relative',
@@ -122,7 +123,6 @@ export default function Loader({ onComplete }) {
             </motion.div>
           </div>
 
-          {/* Progress line */}
           <motion.div
             style={{
               position: 'absolute',

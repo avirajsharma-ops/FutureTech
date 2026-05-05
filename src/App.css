@@ -2,6 +2,19 @@
   min-height: 100vh;
 }
 
+/* Route transition viewport — clips the sliding page so it doesn't
+   create horizontal scroll while exiting/entering. */
+.page-transition-viewport {
+  position: relative;
+  width: 100%;
+  overflow-x: clip;
+}
+
+.page-transition-shell {
+  width: 100%;
+  will-change: transform;
+}
+
 .hero-section {
   position: relative;
   height: 100vh;
