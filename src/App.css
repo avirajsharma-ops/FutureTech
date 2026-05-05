@@ -94,6 +94,13 @@
   /* Allow native vertical scrolling on touch devices while still
      capturing horizontal swipes for the model rotation drag. */
   touch-action: pan-y;
+  /* Promote to its own GPU compositor layer so painting the canvas
+     does not invalidate surrounding DOM, and so the browser hands the
+     layer straight to the compositor thread. */
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  contain: layout paint size style;
 }
 
 .hero-canvas-wrap:active {
@@ -103,6 +110,9 @@
 .hero-canvas-wrap canvas {
   width: 100% !important;
   height: 100% !important;
+  /* Ensure the WebGL surface itself is its own compositor layer. */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .hero-overlay {

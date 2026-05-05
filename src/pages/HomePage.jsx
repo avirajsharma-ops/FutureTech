@@ -12,6 +12,20 @@ const START_Y_ROTATION = 0.92
 const REST_Y_ROTATION = -0.75
 const TOP_OFFSET_RATIO = 0.15
 
+const isTouchDevice = () =>
+  typeof window !== 'undefined' &&
+  (window.matchMedia?.('(pointer: coarse)').matches || 'ontouchstart' in window)
+
+const isMobileViewport = () =>
+  typeof window !== 'undefined' && window.innerWidth <= 768
+
+const isLowPowerDevice = () => {
+  if (typeof navigator === 'undefined') return false
+  const cores = navigator.hardwareConcurrency || 8
+  const mem = navigator.deviceMemory || 8
+  return isMobileViewport() || cores <= 4 || mem <= 4
+}
+
 const getTopOffsetRatio = () => {
   if (typeof window === 'undefined') return TOP_OFFSET_RATIO
   return window.innerWidth <= 480 ? 0.08 : window.innerWidth <= 768 ? 0.10 : TOP_OFFSET_RATIO
@@ -21,7 +35,7 @@ const INTRO_ROTATE_SECONDS = 2.4
 function HeroModel({ modelUrl, dragCurrentRef, dragTargetRef, scrollYRef, introStartRef, onLoaded }) {
   const groupRef = useRef(null)
   const { scene } = useGLTF(modelUrl)
-  const { viewport, size } = useThree()
+  const { viewport, size, gl, camera } = useThree()
   const isMobile = size.width <= 768
 
   useEffect(() => {
@@ -34,10 +48,26 @@ function HeroModel({ modelUrl, dragCurrentRef, dragTargetRef, scrollYRef, introS
         obj.castShadow = false
         obj.receiveShadow = false
         obj.frustumCulled = true
-        if (obj.material?.map) obj.material.map.anisotropy = 1
+        if (obj.material) {
+          // Cheaper texture sampling on low-end GPUs.
+          if (obj.material.map) {
+            obj.material.map.anisotropy = 1
+            obj.material.map.generateMipmaps = true
+          }
+          // Skip expensive features we don't need.
+          obj.material.flatShading = false
+          obj.material.precision = isMobile ? 'mediump' : 'highp'
+          obj.material.needsUpdate = true
+        }
       }
     })
-  }, [scene])
+    // Pre-compile shaders so the first frame doesn't stutter.
+    try {
+      gl.compile(scene, camera)
+    } catch {
+      // ignore — older three versions
+    }
+  }, [scene, gl, camera, isMobile])
 
   const bounds = useMemo(() => {
     const box = new Box3().setFromObject(scene)
@@ -87,10 +117,34 @@ function HeroModel({ modelUrl, dragCurrentRef, dragTargetRef, scrollYRef, introS
 export default function HomePage({ introStartRef }) {
   const [modelUrl, setModelUrl] = useState(null)
   const [, setIsSceneReady] = useState(false)
+  const [frameloop, setFrameloop] = useState('always')
   const dragCurrentRef = useRef(0)
   const dragTargetRef = useRef(0)
   const scrollYRef = useRef(0)
   const pointerRef = useRef({ active: false, lastX: 0 })
+  const heroSectionRef = useRef(null)
+
+  // Cache device-class flags once (do not re-read on every render).
+  const deviceProfile = useMemo(() => ({
+    lowPower: isLowPowerDevice(),
+    touch: isTouchDevice(),
+    mobile: isMobileViewport(),
+  }), [])
+
+  // Pause the WebGL render loop when the hero scrolls offscreen so the
+  // GPU stops drawing the model while the user is reading content below.
+  useEffect(() => {
+    const node = heroSectionRef.current
+    if (!node || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setFrameloop(entry.isIntersecting ? 'always' : 'never')
+      },
+      { threshold: 0.01 },
+    )
+    io.observe(node)
+    return () => io.disconnect()
+  }, [])
 
   useEffect(() => {
     const onScroll = () => { scrollYRef.current = window.scrollY }
@@ -158,7 +212,7 @@ export default function HomePage({ introStartRef }) {
 
   return (
     <>
-      <section className="hero-section">
+      <section className="hero-section" ref={heroSectionRef}>
         <div
           className="hero-canvas-wrap"
           onPointerDown={handlePointerDown}
@@ -170,13 +224,22 @@ export default function HomePage({ introStartRef }) {
           {modelUrl && (
             <Canvas
               camera={{ fov: 10, position: [0, 0.95, 18] }}
-              dpr={[1, 1.2]}
-              gl={{ antialias: false, powerPreference: 'high-performance', alpha: true, stencil: false, depth: true }}
+              dpr={deviceProfile.lowPower ? [1, 1] : [1, 1.5]}
+              frameloop={frameloop}
+              gl={{
+                antialias: false,
+                powerPreference: 'high-performance',
+                alpha: true,
+                stencil: false,
+                depth: true,
+                preserveDrawingBuffer: false,
+                failIfMajorPerformanceCaveat: false,
+              }}
               performance={{ min: 0.5 }}
             >
-              <ambientLight intensity={1.15} />
-              <directionalLight position={[4, 7, 4]} intensity={2.3} />
-              <directionalLight position={[-5, 3, -6]} intensity={1.25} />
+              <ambientLight intensity={deviceProfile.lowPower ? 1.35 : 1.15} />
+              <directionalLight position={[4, 7, 4]} intensity={deviceProfile.lowPower ? 2.6 : 2.3} />
+              <directionalLight position={[-5, 3, -6]} intensity={deviceProfile.lowPower ? 1.5 : 1.25} />
               <Suspense fallback={null}>
                 <HeroModel
                   modelUrl={modelUrl}
@@ -186,7 +249,10 @@ export default function HomePage({ introStartRef }) {
                   introStartRef={introStartRef}
                   onLoaded={() => setIsSceneReady(true)}
                 />
-                <Environment preset="studio" />
+                {/* HDR environment is expensive on mobile / low-end GPUs.
+                    The boosted directional + ambient lights above keep
+                    the model looking lit without it. */}
+                {!deviceProfile.lowPower && <Environment preset="studio" />}
               </Suspense>
             </Canvas>
           )}
