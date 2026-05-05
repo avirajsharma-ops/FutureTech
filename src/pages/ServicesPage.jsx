@@ -1,4 +1,5 @@
 import PageShell from './PageShell'
+import HeroScene from '../components/HeroScene'
 
 const SERVICES = [
   { title: 'AI & ML Engineering', desc: 'Bespoke model design, training, and deployment for production-scale workloads.' },
@@ -11,19 +12,25 @@ const SERVICES = [
 
 export default function ServicesPage() {
   return (
-    <PageShell
-      eyebrow="What we do"
-      title="A spectrum of services, engineered for scale."
-      lead="From research to production, we architect software that ships, operates, and adapts."
-    >
-      <div className="page-grid">
-        {SERVICES.map((s) => (
-          <div key={s.title} className="page-card liquid-glass liquid-glass--card">
-            <h3>{s.title}</h3>
-            <p>{s.desc}</p>
-          </div>
-        ))}
-      </div>
-    </PageShell>
+    <>
+      <HeroScene
+        title="Services engineered for scale."
+        tagline="From research to production, we architect software that ships, operates, and adapts."
+      />
+      <PageShell
+        eyebrow="What we do"
+        title="A spectrum of services, engineered for scale."
+        lead="From research to production, we architect software that ships, operates, and adapts."
+      >
+        <div className="page-grid">
+          {SERVICES.map((s) => (
+            <div key={s.title} className="page-card liquid-glass liquid-glass--card">
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </PageShell>
+    </>
   )
 }

@@ -1,4 +1,5 @@
 import PageShell from './PageShell'
+import HeroScene from '../components/HeroScene'
 
 const PROJECTS = [
   { tag: 'FINTECH', title: 'Real-time risk engine', desc: 'Sub-50ms transaction scoring across 12 banking partners.' },
@@ -11,11 +12,16 @@ const PROJECTS = [
 
 export default function WorkPage() {
   return (
-    <PageShell
-      eyebrow="Selected Work"
-      title="Systems we've shipped, scaled, and launched."
-      lead="A glimpse into recent engagements across fintech, infrastructure, and intelligent applications."
-    >
+    <>
+      <HeroScene
+        title="Work that ships, scales, and sticks."
+        tagline="A glimpse into recent engagements across fintech, infrastructure, and intelligent applications."
+      />
+      <PageShell
+        eyebrow="Selected Work"
+        title="Systems we've shipped, scaled, and launched."
+        lead="A glimpse into recent engagements across fintech, infrastructure, and intelligent applications."
+      >
       <div className="page-grid">
         {PROJECTS.map((p) => (
           <div key={p.title} className="page-card liquid-glass liquid-glass--card">
@@ -25,6 +31,7 @@ export default function WorkPage() {
           </div>
         ))}
       </div>
-    </PageShell>
+      </PageShell>
+    </>
   )
 }
