@@ -18,7 +18,10 @@ export default function App() {
   const introStartRef = useRef(null)
   const location = useLocation()
 
+  // The location actually rendered by the main <Routes> (always the latest).
   const [displayLocation, setDisplayLocation] = useState(location)
+  // The location we render INSIDE the loader (the page being lifted away).
+  const [prevLocation, setPrevLocation] = useState(null)
   const [transitioning, setTransitioning] = useState(false)
   const [routeReady, setRouteReady] = useState(true)
 
@@ -26,32 +29,32 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
+  // On URL change: snapshot the OLD location into prevLocation,
+  // swap displayLocation immediately, and mount the loader on top.
   useEffect(() => {
     if (location.pathname !== displayLocation.pathname) {
+      setPrevLocation(displayLocation)
+      setDisplayLocation(location)
       setRouteReady(false)
       setTransitioning(true)
+      window.scrollTo({ top: 0, behavior: 'instant' })
     }
   }, [location, displayLocation])
 
-  // Once displayLocation has been swapped & painted, signal the loader.
+  // Signal the loader once the new route has had a chance to paint.
   useEffect(() => {
-    if (transitioning && displayLocation.pathname === location.pathname) {
-      // Wait two frames so the new route has actually rendered/painted.
+    if (transitioning && !routeReady) {
       const id1 = requestAnimationFrame(() => {
         const id2 = requestAnimationFrame(() => setRouteReady(true))
         return () => cancelAnimationFrame(id2)
       })
       return () => cancelAnimationFrame(id1)
     }
-  }, [transitioning, displayLocation, location])
-
-  const handleCovered = useCallback(() => {
-    setDisplayLocation(location)
-    window.scrollTo({ top: 0, behavior: 'instant' })
-  }, [location])
+  }, [transitioning, routeReady])
 
   const handleComplete = useCallback(() => {
     setTransitioning(false)
+    setPrevLocation(null)
   }, [])
 
   return (
@@ -77,9 +80,20 @@ export default function App() {
 
       {transitioning && (
         <TransitionLoader
-          onCovered={handleCovered}
           onComplete={handleComplete}
           ready={routeReady}
+          previousPage={
+            prevLocation ? (
+              <Routes location={prevLocation}>
+                <Route path="/" element={<HomePage introStartRef={introStartRef} />} />
+                <Route path="/work" element={<WorkPage />} />
+                <Route path="/services" element={<ServicesPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="*" element={null} />
+              </Routes>
+            ) : null
+          }
         />
       )}
 

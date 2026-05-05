@@ -5,8 +5,15 @@ import { motion, AnimatePresence } from 'motion/react'
  * Page-switch loader using the EXACT original loader animation.
  * Counter rises to ~90% over a minimum duration, then completes to 100%
  * once `ready` is true (parent signals when the new route has mounted).
+ *
+ * `previousPage` is rendered inside the sliding panel so the exit
+ * animation looks like the OLD page lifting away to reveal the NEW.
  */
-export default function TransitionLoader({ onCovered, onComplete, ready }) {
+export default function TransitionLoader({
+  onComplete,
+  ready,
+  previousPage,
+}) {
   const [count, setCount] = useState(0)
   const [done, setDone] = useState(false)
   const readyRef = useRef(ready)
@@ -16,7 +23,6 @@ export default function TransitionLoader({ onCovered, onComplete, ready }) {
   }, [ready])
 
   useEffect(() => {
-    onCovered?.()
     const start = performance.now()
     const minDuration = 900
     const finishDuration = 300
@@ -45,7 +51,7 @@ export default function TransitionLoader({ onCovered, onComplete, ready }) {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [onCovered])
+  }, [])
 
   return (
     <AnimatePresence onExitComplete={onComplete}>
@@ -73,6 +79,32 @@ export default function TransitionLoader({ onCovered, onComplete, ready }) {
           }}
         >
           <div style={{ position: 'absolute', inset: 0, background: 'var(--bg)' }} />
+
+          {/* Snapshot of the previous page underneath the counter overlay */}
+          {previousPage && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                overflow: 'hidden',
+                pointerEvents: 'none',
+              }}
+              aria-hidden="true"
+            >
+              {previousPage}
+            </div>
+          )}
+
+          {/* Subtle scrim so counter remains legible over any page bg */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.06) 100%)',
+              pointerEvents: 'none',
+            }}
+          />
 
           <div
             style={{

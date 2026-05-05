@@ -3,9 +3,9 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, useGLTF } from '@react-three/drei'
 import { Box3, Vector3 } from 'three'
 import DataSection from '../components/DataSection'
+import { HERO_MODEL_URL, heroModelPromise } from '../lib/heroModel'
 
-const MODEL_URL = '/models/mwft-hero-optimized.glb'
-const MODEL_CACHE_KEY = 'mwft-model-cache-v2'
+const MODEL_URL = HERO_MODEL_URL
 const REST_Z = 0
 const END_X_ROTATION = -0.18
 const START_Y_ROTATION = 0.92
@@ -17,26 +17,6 @@ const getTopOffsetRatio = () => {
   return window.innerWidth <= 480 ? 0.08 : window.innerWidth <= 768 ? 0.10 : TOP_OFFSET_RATIO
 }
 const INTRO_ROTATE_SECONDS = 2.4
-
-const getCachedModelSource = async (url) => {
-  if (typeof window === 'undefined' || !('caches' in window)) return url
-  try {
-    const cache = await caches.open(MODEL_CACHE_KEY)
-    let response = await cache.match(url)
-    if (!response) {
-      const networkResponse = await fetch(url, { cache: 'force-cache' })
-      if (networkResponse.ok) {
-        await cache.put(url, networkResponse.clone())
-        response = networkResponse
-      }
-    }
-    if (!response) return url
-    const modelBlob = await response.blob()
-    return URL.createObjectURL(modelBlob)
-  } catch {
-    return url
-  }
-}
 
 function HeroModel({ modelUrl, dragCurrentRef, dragTargetRef, scrollYRef, introStartRef, onLoaded }) {
   const groupRef = useRef(null)
@@ -120,19 +100,11 @@ export default function HomePage({ introStartRef }) {
 
   useEffect(() => {
     let isMounted = true
-    let blobUrl = null
-    ;(async () => {
-      const cachedUrl = await getCachedModelSource(MODEL_URL)
-      if (!isMounted) {
-        if (cachedUrl.startsWith('blob:')) URL.revokeObjectURL(cachedUrl)
-        return
-      }
-      if (cachedUrl.startsWith('blob:')) blobUrl = cachedUrl
-      setModelUrl(cachedUrl)
-    })()
+    heroModelPromise.then((cachedUrl) => {
+      if (isMounted) setModelUrl(cachedUrl)
+    })
     return () => {
       isMounted = false
-      if (blobUrl) URL.revokeObjectURL(blobUrl)
     }
   }, [])
 

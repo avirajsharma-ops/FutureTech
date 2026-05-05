@@ -1,20 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { heroModelPromise } from '../lib/heroModel'
 
 export default function Loader({ onComplete }) {
   const [count, setCount] = useState(0)
   const [done, setDone] = useState(false)
-  const readyRef = useRef(
-    typeof document !== 'undefined' && document.readyState === 'complete'
-  )
+  const readyRef = useRef(false)
 
-  // Mark ready when the page has actually finished loading.
+  // Mark ready only when BOTH the page has loaded AND the hero GLB
+  // has finished downloading + caching.
   useEffect(() => {
-    if (readyRef.current) return
-    const onLoad = () => {
-      readyRef.current = true
+    let pageLoaded =
+      typeof document !== 'undefined' && document.readyState === 'complete'
+    let modelLoaded = false
+
+    const checkReady = () => {
+      if (pageLoaded && modelLoaded) readyRef.current = true
     }
-    window.addEventListener('load', onLoad)
+
+    const onLoad = () => {
+      pageLoaded = true
+      checkReady()
+    }
+    if (!pageLoaded) window.addEventListener('load', onLoad)
+
+    heroModelPromise.then(() => {
+      modelLoaded = true
+      checkReady()
+    })
+
+    checkReady()
     return () => window.removeEventListener('load', onLoad)
   }, [])
 
