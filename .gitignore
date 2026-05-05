@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Meshy AI raw source assets (not used at runtime)
+Meshy_AI_*/
+Meshy_AI_*.glb
+Meshy_AI_*.fbx
