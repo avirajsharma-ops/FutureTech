@@ -23,19 +23,27 @@ export default function App() {
   // The location we render INSIDE the loader (the page being lifted away).
   const [prevLocation, setPrevLocation] = useState(null)
   const [transitioning, setTransitioning] = useState(false)
+  const [loaderVisible, setLoaderVisible] = useState(false)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
-  // On URL change: snapshot the OLD location into prevLocation,
-  // swap displayLocation immediately, and mount the loader on top.
+  // On URL change: trigger header fade-out, then after the fade is done
+  // swap displayLocation and mount the loader cover on top.
   useEffect(() => {
     if (location.pathname !== displayLocation.pathname) {
-      setPrevLocation(displayLocation)
-      setDisplayLocation(location)
-      setTransitioning(true)
-      window.scrollTo({ top: 0, behavior: 'instant' })
+      const snapshot = displayLocation
+      setTransitioning(true) // header begins fading out
+
+      // Wait for the header fade (~350ms) before covering the screen.
+      const id = setTimeout(() => {
+        setPrevLocation(snapshot)
+        setDisplayLocation(location)
+        setLoaderVisible(true)
+        window.scrollTo({ top: 0, behavior: 'instant' })
+      }, 350)
+      return () => clearTimeout(id)
     }
   }, [location, displayLocation])
 
@@ -49,6 +57,7 @@ export default function App() {
   }, [transitioning])
 
   const handleComplete = useCallback(() => {
+    setLoaderVisible(false)
     setTransitioning(false)
     setPrevLocation(null)
   }, [])
@@ -74,7 +83,7 @@ export default function App() {
         <Route path="*" element={<HomePage introStartRef={introStartRef} />} />
       </Routes>
 
-      {transitioning && (
+      {loaderVisible && (
         <TransitionLoader
           onComplete={handleComplete}
           previousPage={
