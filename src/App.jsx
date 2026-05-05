@@ -39,6 +39,15 @@ export default function App() {
     }
   }, [location, displayLocation])
 
+  // Reflect transition state on <html> so global UI (header) can react.
+  useEffect(() => {
+    if (transitioning) {
+      document.documentElement.setAttribute('data-transitioning', 'true')
+    } else {
+      document.documentElement.removeAttribute('data-transitioning')
+    }
+  }, [transitioning])
+
   const handleComplete = useCallback(() => {
     setTransitioning(false)
     setPrevLocation(null)
