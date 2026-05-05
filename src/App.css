@@ -91,7 +91,9 @@
   width: 100vw;
   height: 100vh;
   cursor: grab;
-  touch-action: none;
+  /* Allow native vertical scrolling on touch devices while still
+     capturing horizontal swipes for the model rotation drag. */
+  touch-action: pan-y;
 }
 
 .hero-canvas-wrap:active {

@@ -109,20 +109,51 @@ export default function HomePage({ introStartRef }) {
   }, [])
 
   const handlePointerDown = (e) => {
+    // On touch devices, do not capture the pointer immediately — that
+    // would hijack vertical scroll. We capture lazily inside move only
+    // once the gesture proves to be predominantly horizontal.
     pointerRef.current.active = true
     pointerRef.current.lastX = e.clientX
-    e.currentTarget.setPointerCapture?.(e.pointerId)
+    pointerRef.current.startX = e.clientX
+    pointerRef.current.startY = e.clientY
+    pointerRef.current.captured = false
+    pointerRef.current.pointerType = e.pointerType
+    if (e.pointerType === 'mouse') {
+      e.currentTarget.setPointerCapture?.(e.pointerId)
+      pointerRef.current.captured = true
+    }
   }
   const handlePointerMove = (e) => {
     if (!pointerRef.current.active) return
     const dx = e.clientX - pointerRef.current.lastX
+    // For touch / pen, only engage the rotate drag if the gesture is
+    // clearly horizontal. Otherwise let the browser scroll the page.
+    if (!pointerRef.current.captured && pointerRef.current.pointerType !== 'mouse') {
+      const totalDx = Math.abs(e.clientX - pointerRef.current.startX)
+      const totalDy = Math.abs(e.clientY - pointerRef.current.startY)
+      if (totalDy > 8 && totalDy > totalDx) {
+        // Vertical scroll wins — disengage entirely for this gesture.
+        pointerRef.current.active = false
+        return
+      }
+      if (totalDx > 8 && totalDx > totalDy) {
+        e.currentTarget.setPointerCapture?.(e.pointerId)
+        pointerRef.current.captured = true
+      } else {
+        pointerRef.current.lastX = e.clientX
+        return
+      }
+    }
     pointerRef.current.lastX = e.clientX
     dragTargetRef.current = Math.max(-1.35, Math.min(1.35, dragTargetRef.current + dx * 0.006))
   }
   const handlePointerUp = (e) => {
     pointerRef.current.active = false
     dragTargetRef.current = 0
-    e.currentTarget.releasePointerCapture?.(e.pointerId)
+    if (pointerRef.current.captured) {
+      e.currentTarget.releasePointerCapture?.(e.pointerId)
+      pointerRef.current.captured = false
+    }
   }
 
   return (
