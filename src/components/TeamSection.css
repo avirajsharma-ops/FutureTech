@@ -1,0 +1,463 @@
+/* ───────────────────────────────────────────────────────────
+   Team section — auto-cycling 3D card stack
+   ─────────────────────────────────────────────────────────── */
+
+.team-section {
+  padding: clamp(64px, 9vw, 120px) clamp(20px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(40px, 6vw, 72px);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.team-section__head {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+  text-align: center;
+  align-items: center;
+}
+
+.team-section__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: clamp(0.7rem, 1.1vw, 0.78rem);
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+  font-weight: 600;
+}
+
+.team-section__title {
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.team-section__lead {
+  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--text) 70%, transparent);
+}
+
+/* ─── Stack wrapper ─── */
+.team-stack-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  perspective: 760px;
+  width: 100%;
+  min-height: clamp(30px, 38vw, 0px);
+}
+
+.team-stack {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  transform-style: preserve-3d;
+  width: 100%;
+  max-width: 760px;
+  height: 340px;
+  transition: height 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.team-stack.is-hovered {
+  height: 500px;
+}
+
+/* ─── Card ─── */
+.team-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  list-style: none;
+  height: 110px !important;
+  padding: 15px !important;
+  background: #fff;
+  border-radius: 26px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  will-change: transform, opacity, filter;
+  transform-origin: 50% 50%;
+  transition:
+    transform 620ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.team-card:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+
+:root[data-theme='dark'] .team-card {
+  background: #14161a;
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 0 12px rgba(0, 0, 0, 0.4),
+    0 18px 44px rgba(0, 0, 0, 0.55);
+}
+
+/* Stack ordering — slot 0 = OLDEST (top/back/blurred);
+   slot 3 = NEWEST (bottom/front/sharp). The Y offsets deliberately
+   expose the previous cards above the active one, matching the source
+   card demo instead of hiding everything behind one card. */
+.team-card--slot-0 {
+  transform: translateY(0) translateZ(-150px) scale(0.92);
+  opacity: 0.48;
+  filter: blur(4px);
+  z-index: 1;
+}
+.team-card--slot-1 {
+  transform: translateY(64px) translateZ(-70px) scale(0.96);
+  opacity: 0.72;
+  filter: blur(2px);
+  z-index: 2;
+}
+.team-card--slot-2 {
+  transform: translateY(128px) translateZ(65px) scale(0.99);
+  opacity: 0.95;
+  filter: blur(0.6px);
+  z-index: 3;
+}
+.team-card--slot-3 {
+  transform: translateY(192px) translateZ(190px) scale(1.02);
+  opacity: 1;
+  filter: blur(0);
+  z-index: 4;
+}
+
+/* The outgoing front card slips just past the viewer and fades quickly. */
+.team-card--out {
+  transform: translateY(252px) translateZ(280px) scale(1.04);
+  opacity: 0;
+  filter: blur(1.5px);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Hover: spread into a flat column, no depth or blur. */
+.team-stack.is-hovered .team-card {
+  filter: blur(0);
+  opacity: 1;
+}
+.team-stack.is-hovered .team-card--slot-0 {
+  transform: translateY(0) translateZ(0) scale(1);
+}
+.team-stack.is-hovered .team-card--slot-1 {
+  transform: translateY(124px) translateZ(0) scale(1);
+}
+.team-stack.is-hovered .team-card--slot-2 {
+  transform: translateY(248px) translateZ(0) scale(1);
+}
+.team-stack.is-hovered .team-card--slot-3 {
+  transform: translateY(372px) translateZ(0) scale(1);
+}
+.team-stack.is-hovered .team-card--out {
+  /* While expanded, just hide the off-stack cards. */
+  transform: translateY(0) translateZ(0) scale(0.9);
+  opacity: 0;
+}
+
+.team-card__avatar {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.team-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px !important;
+  min-width: 0;
+}
+
+.team-card__content h3 {
+  font-weight: 600;
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  line-height: 0;
+  color: #0a0a0a;
+}
+
+:root[data-theme='dark'] .team-card__content h3 {
+  color: #f4f4f4;
+}
+
+.team-card__quote {
+  font-size: clamp(0.78rem, 1.05vw, 0.9rem);
+  line-height: 0;
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.48);
+}
+
+:root[data-theme='dark'] .team-card__quote {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.team-card__content p:not(.team-card__quote) {
+  font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+  line-height: 0;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='dark'] .team-card__content p:not(.team-card__quote) {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ─── Tablet ─── */
+@media (max-width: 1024px) {
+  .team-stack {
+    max-width: 640px;
+  }
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  .team-section {
+    padding: clamp(48px, 10vw, 80px) clamp(16px, 5vw, 32px);
+    gap: 32px;
+  }
+  .team-stack-wrap {
+    perspective: 760px;
+    min-height: 340px;
+  }
+  .team-stack {
+    height: 270px;
+  }
+  .team-stack.is-hovered {
+    height: 440px;
+    position: cursor;
+  }
+  .team-card {
+    height: 110px;
+    padding: 16px;
+    gap: 14px;
+    border-radius: 14px;
+  }
+  .team-card__avatar {
+    width: 68px;
+    height: 68px;
+  }
+  .team-card--slot-0 {
+    transform: translateY(0) translateZ(-115px) scale(0.93);
+  }
+  .team-card--slot-1 {
+    transform: translateY(48px) translateZ(-56px) scale(0.96);
+  }
+  .team-card--slot-2 {
+    transform: translateY(96px) translateZ(52px) scale(0.99);
+  }
+  .team-card--slot-3 {
+    transform: translateY(144px) translateZ(132px) scale(1.01);
+  }
+  .team-card--out {
+    transform: translateY(190px) translateZ(190px) scale(1.03);
+  }
+  .team-stack.is-hovered .team-card--slot-1 {
+    transform: translateY(118px) translateZ(0) scale(1);
+  }
+  .team-stack.is-hovered .team-card--slot-2 {
+    transform: translateY(236px) translateZ(0) scale(1);
+  }
+  .team-stack.is-hovered .team-card--slot-3 {
+    transform: translateY(354px) translateZ(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .team-card {
+    height: 100px;
+    padding: 14px;
+  }
+  .team-card__avatar {
+    width: 60px;
+    height: 60px;
+  }
+  .team-stack {
+    height: 240px;
+  }
+  .team-stack.is-hovered {
+    height: 400px;
+  }
+  .team-card--slot-1 {
+    transform: translateY(42px) translateZ(-48px) scale(0.96);
+  }
+  .team-card--slot-2 {
+    transform: translateY(84px) translateZ(44px) scale(0.99);
+  }
+  .team-card--slot-3 {
+    transform: translateY(126px) translateZ(112px) scale(1.01);
+  }
+  .team-stack.is-hovered .team-card--slot-1 {
+    transform: translateY(106px) translateZ(0);
+  }
+  .team-stack.is-hovered .team-card--slot-2 {
+    transform: translateY(212px) translateZ(0);
+  }
+  .team-stack.is-hovered .team-card--slot-3 {
+    transform: translateY(318px) translateZ(0);
+  }
+}
+
+/* ───────────────────────────────────────────────────────────
+   Expanded profile modal
+   ─────────────────────────────────────────────────────────── */
+
+.team-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 48px);
+}
+
+.team-modal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  transform-origin: center center;
+  background: #fff;
+  border-radius: 22px;
+  padding: clamp(28px, 4vw, 44px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  box-shadow:
+    0 0 24px rgba(0, 0, 0, 0.2),
+    0 30px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme='dark'] .team-modal {
+  background: #14161a;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.team-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 200ms ease, transform 200ms ease;
+}
+.team-modal__close:hover {
+  background: rgba(0, 0, 0, 0.12);
+  transform: scale(1.05);
+}
+:root[data-theme='dark'] .team-modal__close {
+  background: rgba(255, 255, 255, 0.08);
+}
+:root[data-theme='dark'] .team-modal__close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.team-modal__avatar {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.team-modal__content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.team-modal__content h3 {
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.4vw, 1.7rem);
+  line-height: 1.1;
+  color: #0a0a0a;
+}
+:root[data-theme='dark'] .team-modal__content h3 {
+  color: #f4f4f4;
+}
+
+.team-modal__quote {
+  font-size: clamp(0.9rem, 1.35vw, 1rem);
+  line-height: 1.3;
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='dark'] .team-modal__quote {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.team-modal__role {
+  font-size: clamp(0.9rem, 1.4vw, 1rem);
+  color: rgba(0, 0, 0, 0.55);
+}
+:root[data-theme='dark'] .team-modal__role {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.team-modal__bio {
+  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.72);
+  max-width: 460px;
+}
+:root[data-theme='dark'] .team-modal__bio {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.team-modal__skills {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.team-modal__skills li {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.7);
+}
+:root[data-theme='dark'] .team-modal__skills li {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 480px) {
+  .team-modal__avatar {
+    width: 110px;
+    height: 110px;
+  }
+}

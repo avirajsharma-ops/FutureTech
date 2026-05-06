@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { motion, useAnimationControls } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Loader from './components/Loader'
@@ -11,21 +11,19 @@ import ServicesPage from './pages/ServicesPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import { HERO_MODEL_URL } from './lib/heroModel'
+import { COIN_MODEL_URL } from './lib/coinModel'
+import { WORK_MODEL_URL } from './lib/workModel'
+import { SERVICES_MODEL_URL } from './lib/servicesModel'
 import './styles/liquid-glass.css'
 import './App.css'
 
-const PAGE_REST = { scale: 1, y: '0%', borderRadius: 0 }
-const PAGE_EXIT = { scale: 0.92, y: '-110%', borderRadius: 24 }
-const PAGE_EXIT_TRANSITION = {
-  duration: 1.2,
-  scale: { duration: 0.6, ease: [0.65, 0, 0.35, 1] },
-  y: { duration: 1.0, ease: [0.76, 0, 0.24, 1], delay: 0.35 },
-  borderRadius: { duration: 0.6, ease: [0.65, 0, 0.35, 1] },
-}
+const PAGE_FADE_DURATION = 0.28
+const MODEL_INTRO_ARM_DELAY = 500
+const MODEL_INTRO_PATHS = new Set(['/', '/work', '/services', '/about'])
 
 // Assets to opportunistically prefetch once the homepage is idle.
 // Non-render-blocking: injected via <link rel="prefetch"> after first paint.
-const PREFETCH_ASSETS = [HERO_MODEL_URL]
+const PREFETCH_ASSETS = [HERO_MODEL_URL, COIN_MODEL_URL, WORK_MODEL_URL, SERVICES_MODEL_URL]
 
 function injectPrefetch(href, as) {
   if (typeof document === 'undefined') return
@@ -38,15 +36,19 @@ function injectPrefetch(href, as) {
   document.head.appendChild(link)
 }
 
+function getModelIntroPath(pathname) {
+  const normalized = pathname === '/' ? '/' : pathname.replace(/\/+$/, '')
+  return MODEL_INTRO_PATHS.has(normalized) ? normalized : null
+}
+
 export default function App() {
   const [theme] = useState('light')
-  const introStartRef = useRef(null)
+  const introStartRefs = useRef(
+    Object.fromEntries([...MODEL_INTRO_PATHS].map((path) => [path, { current: null }])),
+  )
+  const [loaderComplete, setLoaderComplete] = useState(false)
   const location = useLocation()
-  const prevLocationRef = useRef(location)
-  const scrollSnapshotRef = useRef(0)
-
-  const [outgoingLocation, setOutgoingLocation] = useState(null)
-  const controls = useAnimationControls()
+  const modelIntroPath = getModelIntroPath(location.pathname)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -69,97 +71,62 @@ export default function App() {
     }
   }, [])
 
-  // On URL change: keep the OLD route mounted in a viewport-locked overlay
-  // and animate it out. The NEW route mounts immediately in the live <main>
-  // (so its assets begin loading during the animation, not after).
+  // Scroll to top whenever the route changes.
   useEffect(() => {
-    if (location.pathname === prevLocationRef.current.pathname) return
-
-    const outgoing = prevLocationRef.current
-    prevLocationRef.current = location
-
-    // Capture current scroll so the overlay shows what the user was looking at,
-    // then jump the live page to the top so the new route renders cleanly.
-    scrollSnapshotRef.current = window.scrollY || window.pageYOffset || 0
     window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [location.pathname])
 
-    document.documentElement.setAttribute('data-transitioning', 'true')
-    setOutgoingLocation(outgoing)
-  }, [location])
+  useLayoutEffect(() => {
+    if (!modelIntroPath) return undefined
 
-  // Drive the exit animation once the overlay has actually mounted.
-  // (Calling controls.start before mount is a no-op because the controls
-  // aren't bound to a component yet.)
-  useEffect(() => {
-    if (!outgoingLocation) return
+    const introStartRef = introStartRefs.current[modelIntroPath]
+    introStartRef.current = null
 
-    let cancelled = false
-    controls.set(PAGE_REST)
+    if (!loaderComplete) return undefined
 
-    // Wait one frame so the overlay paints in its REST state before we
-    // start animating — otherwise some browsers skip straight to the end.
-    const raf = requestAnimationFrame(() => {
-      if (cancelled) return
-      controls.start(PAGE_EXIT, PAGE_EXIT_TRANSITION).then(() => {
-        if (cancelled) return
-        setOutgoingLocation(null)
-        controls.set(PAGE_REST)
-        document.documentElement.removeAttribute('data-transitioning')
-      })
-    })
+    const timer = window.setTimeout(() => {
+      introStartRef.current = performance.now()
+    }, MODEL_INTRO_ARM_DELAY)
 
-    return () => {
-      cancelled = true
-      cancelAnimationFrame(raf)
-    }
-  }, [outgoingLocation, controls])
+    return () => window.clearTimeout(timer)
+  }, [loaderComplete, modelIntroPath])
 
-  const renderRoutes = (loc) => (
-    <Routes location={loc}>
-      <Route path="/" element={<HomePage introStartRef={introStartRef} />} />
-      <Route path="/work" element={<WorkPage />} />
-      <Route path="/services" element={<ServicesPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="*" element={<HomePage introStartRef={introStartRef} />} />
-    </Routes>
+  const getIntroRef = (path) => (
+    modelIntroPath === path ? introStartRefs.current[path] : null
   )
 
   return (
     <>
       <Loader
         onComplete={() => {
-          setTimeout(() => {
-            introStartRef.current = performance.now()
-          }, 500)
+          setLoaderComplete(true)
         }}
       />
       <LiquidGlassDefs />
       <Header />
 
-      {/* Live page — always reflects the current URL.
-          The new page starts mounting (and loading its assets) the moment
-          the URL changes, in parallel with the exit animation above it. */}
-      <main className="page-live">{renderRoutes(location)}</main>
-
-      {/* Exit overlay — viewport-locked snapshot of the previous page,
-          animates out (scale + slide-up). Pointer-events disabled. */}
-      {outgoingLocation && (
-        <motion.div
-          className="page-exit-overlay"
-          initial={PAGE_REST}
-          animate={controls}
-          style={{ originX: 0.5, originY: 0 }}
-          aria-hidden="true"
+      {/* Cross-fade between routes. mode="wait" lets the outgoing page
+          finish fading out before the new one fades in, so the two
+          never visually overlap. */}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.main
+          key={location.pathname}
+          className="page-live"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: PAGE_FADE_DURATION, ease: 'easeOut' }}
         >
-          <div
-            className="page-exit-overlay__inner"
-            style={{ transform: `translateY(-${scrollSnapshotRef.current}px)` }}
-          >
-            {renderRoutes(outgoingLocation)}
-          </div>
-        </motion.div>
-      )}
+          <Routes location={location}>
+            <Route path="/" element={<HomePage introStartRef={getIntroRef('/')} />} />
+            <Route path="/work" element={<WorkPage introStartRef={getIntroRef('/work')} />} />
+            <Route path="/services" element={<ServicesPage introStartRef={getIntroRef('/services')} />} />
+            <Route path="/about" element={<AboutPage introStartRef={getIntroRef('/about')} />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="*" element={<HomePage introStartRef={getIntroRef('/')} />} />
+          </Routes>
+        </motion.main>
+      </AnimatePresence>
 
       <Footer />
     </>

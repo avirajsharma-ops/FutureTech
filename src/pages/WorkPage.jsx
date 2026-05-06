@@ -1,5 +1,12 @@
+import { useEffect, useState } from 'react'
 import PageShell from './PageShell'
-import HeroScene from '../components/HeroScene'
+import HeroScene, { SILVER_MODEL_LIGHTING_PROPS } from '../components/HeroScene'
+import {
+  WORK_MODEL_URL,
+  workModelPromise,
+  getWorkModelReady,
+  getWorkModelUrl,
+} from '../lib/workModel'
 
 const PROJECTS = [
   { tag: 'FINTECH', title: 'Real-time risk engine', desc: 'Sub-50ms transaction scoring across 12 banking partners.' },
@@ -10,12 +17,31 @@ const PROJECTS = [
   { tag: 'HEALTH', title: 'Clinical assistant', desc: 'HIPAA-compliant LLM workflow for triage notes.' },
 ]
 
-export default function WorkPage() {
+export default function WorkPage({ introStartRef }) {
+  // Seed cached blob URL synchronously when available.
+  const [workModelUrl, setWorkModelUrl] = useState(
+    getWorkModelReady() ? getWorkModelUrl() : WORK_MODEL_URL,
+  )
+
+  useEffect(() => {
+    if (getWorkModelReady()) return
+    let mounted = true
+    workModelPromise.then((url) => {
+      if (mounted) setWorkModelUrl(url)
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   return (
     <>
       <HeroScene
+        modelUrl={workModelUrl}
         title="Work that ships, scales, and sticks."
         tagline="A glimpse into recent engagements across fintech, infrastructure, and intelligent applications."
+        introStartRef={introStartRef}
+        {...SILVER_MODEL_LIGHTING_PROPS}
       />
       <PageShell
         eyebrow="Selected Work"

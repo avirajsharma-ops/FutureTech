@@ -1,8 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, useGLTF } from '@react-three/drei'
-import { Box3, Vector3 } from 'three'
-import { HERO_MODEL_URL, heroModelPromise } from '../lib/heroModel'
+import { Box3, Color, PMREMGenerator, Vector3 } from 'three'
+import { HERO_MODEL_URL, heroModelPromise, getHeroModelReady, getHeroModelUrl } from '../lib/heroModel'
 
 const REST_Z = 0
 const END_X_ROTATION = -0.18
@@ -14,6 +14,25 @@ const INTRO_ROTATE_SECONDS = 2.4
 // Subtle parallax bounds (radians). Keep small so it feels alive but never busy.
 const POINTER_TILT_X = 0.08 // tilt up/down based on mouse Y
 const POINTER_TILT_Y = 0.12 // sway left/right based on mouse X
+// Even subtler bounds used when dragAxis === 'z' (e.g. the coin).
+const SUBTLE_TILT_Y = 0.04
+const SUBTLE_TILT_Z = 0.05
+
+export const SILVER_MODEL_LIGHTING_PROPS = {
+  frontLight: true,
+  ambientIntensity: 1.65,
+  keyLightIntensity: 3.4,
+  fillLightIntensity: 2.1,
+  frontLightIntensity: 3.1,
+  rimLightIntensity: 1.6,
+  materialColor: '#dbe3ec',
+  materialMetalness: 0.82,
+  materialRoughness: 0.34,
+  materialEnvMapIntensity: 2.4,
+  materialEmissive: '#c9d2dc',
+  materialEmissiveIntensity: 0.08,
+  toneMappingExposure: 1.18,
+}
 
 const isTouchDevice = () =>
   typeof window !== 'undefined' &&
@@ -43,10 +62,33 @@ function HeroModel({
   pointerTiltRef,
   enableIntro,
   onLoaded,
+  baseRotation,
+  scaleMultiplier,
+  mobileOnlyScale,
+  mobileScaleMultiplier,
+  yOffset,
+  mobileYOffset,
+  centerVertically,
+  dragAxis,
+  introAxis,
+  introStartOffset,
+  materialColor,
+  materialMetalness,
+  materialRoughness,
+  materialEnvMapIntensity,
+  materialEmissive,
+  materialEmissiveIntensity,
 }) {
   const groupRef = useRef(null)
-  const tiltCurrentRef = useRef({ x: 0, y: 0 })
+  const tiltCurrentRef = useRef({ x: 0, y: 0, z: 0 })
   const { scene } = useGLTF(modelUrl)
+  // Clone the scene per instance. useGLTF caches and SHARES a single
+  // Three.js Object3D across all consumers — a Three object can only
+  // belong to one parent, so when two HeroScene canvases mount
+  // simultaneously (the live page and the page-exit overlay) the second
+  // mount steals the scene from the first. Cloning gives every canvas
+  // its own independent copy.
+  const clonedScene = useMemo(() => scene.clone(true), [scene])
   const { viewport, size, gl, camera } = useThree()
   const isMobile = size.width <= 768
 
@@ -55,53 +97,125 @@ function HeroModel({
   }, [onLoaded])
 
   useEffect(() => {
-    scene.traverse((obj) => {
+    clonedScene.traverse((obj) => {
       if (obj.isMesh) {
         obj.castShadow = false
         obj.receiveShadow = false
         obj.frustumCulled = true
         if (obj.material) {
-          if (obj.material.map) {
-            obj.material.map.anisotropy = 1
-            obj.material.map.generateMipmaps = true
+          const shouldCloneMaterial =
+            materialColor != null ||
+            materialMetalness != null ||
+            materialRoughness != null ||
+            materialEnvMapIntensity != null ||
+            materialEmissive != null ||
+            materialEmissiveIntensity != null
+          if (shouldCloneMaterial && !obj.userData.materialClonedForHero) {
+            obj.material = Array.isArray(obj.material)
+              ? obj.material.map((mat) => mat.clone())
+              : obj.material.clone()
+            obj.userData.materialClonedForHero = true
           }
-          obj.material.flatShading = false
-          obj.material.precision = isMobile ? 'mediump' : 'highp'
-          obj.material.needsUpdate = true
+          const materials = Array.isArray(obj.material) ? obj.material : [obj.material]
+          materials.forEach((material) => {
+            if (material.map) {
+              material.map.anisotropy = 1
+              material.map.generateMipmaps = true
+            }
+            if (materialColor && material.color) {
+              material.color = new Color(materialColor)
+            }
+            if (materialMetalness != null && 'metalness' in material) {
+              material.metalness = materialMetalness
+            }
+            if (materialRoughness != null && 'roughness' in material) {
+              material.roughness = materialRoughness
+            }
+            if (materialEnvMapIntensity != null && 'envMapIntensity' in material) {
+              material.envMapIntensity = materialEnvMapIntensity
+            }
+            if (materialEmissive && material.emissive) {
+              material.emissive = new Color(materialEmissive)
+            }
+            if (materialEmissiveIntensity != null && 'emissiveIntensity' in material) {
+              material.emissiveIntensity = materialEmissiveIntensity
+            }
+            material.flatShading = false
+            material.precision = isMobile ? 'mediump' : 'highp'
+            material.needsUpdate = true
+          })
         }
       }
     })
     try {
-      gl.compile(scene, camera)
+      gl.compile(clonedScene, camera)
     } catch {
       // older three versions
     }
-  }, [scene, gl, camera, isMobile])
+  }, [
+    clonedScene,
+    gl,
+    camera,
+    isMobile,
+    materialColor,
+    materialMetalness,
+    materialRoughness,
+    materialEnvMapIntensity,
+    materialEmissive,
+    materialEmissiveIntensity,
+  ])
 
   const bounds = useMemo(() => {
-    const box = new Box3().setFromObject(scene)
+    const box = new Box3().setFromObject(clonedScene)
     const s = new Vector3()
+    const c = new Vector3()
     box.getSize(s)
-    return { sizeX: s.x, sizeY: s.y, minY: box.min.y }
-  }, [scene])
+    box.getCenter(c)
+    return { sizeX: s.x, sizeY: s.y, minY: box.min.y, centerY: c.y }
+  }, [clonedScene])
 
   const topOffset = isMobile ? getTopOffsetRatio() : TOP_OFFSET_RATIO
   const heightScale = (viewport.height * (1 - topOffset)) / bounds.sizeY
   const maxWidth = isMobile ? viewport.width * 0.96 : viewport.width
   const widthScale = maxWidth / bounds.sizeX
-  const scale = Math.min(heightScale, widthScale)
-  const restY = -viewport.height / 2 - bounds.minY * scale
+  // Resolve the active scale multiplier:
+  //  - mobileScaleMultiplier (when set) overrides on mobile.
+  //  - mobileOnlyScale gates scaleMultiplier to mobile only.
+  let effectiveScaleMul = scaleMultiplier ?? 1
+  if (isMobile && mobileScaleMultiplier != null) {
+    effectiveScaleMul = mobileScaleMultiplier
+  } else if (mobileOnlyScale && !isMobile) {
+    effectiveScaleMul = 1
+  }
+  const effectiveYOffset = isMobile && mobileYOffset != null ? mobileYOffset : yOffset ?? 0
+  const scale = Math.min(heightScale, widthScale) * effectiveScaleMul
+  // Default: anchor model so its bottom sits at the bottom of the viewport.
+  // centerVertically: anchor by centre, so a flat coin reads as floating.
+  const restY = centerVertically
+    ? -bounds.centerY * scale + effectiveYOffset
+    : -viewport.height / 2 - bounds.minY * scale + effectiveYOffset
 
   useFrame((_, delta) => {
     if (!groupRef.current) return
     dragCurrentRef.current += (dragTargetRef.current - dragCurrentRef.current) * Math.min(1, delta * 7)
 
-    // Smoothly chase the pointer-derived tilt targets.
-    const targetTiltX = pointerTiltRef.current.x * POINTER_TILT_X
-    const targetTiltY = pointerTiltRef.current.y * POINTER_TILT_Y
+    // Smoothly chase the pointer-derived tilt targets. The axes used
+    // depend on dragAxis: 'z' mode produces a subtle Z+Y parallax,
+    // every other mode keeps the original X+Y parallax.
     const lerp = Math.min(1, delta * 4)
-    tiltCurrentRef.current.x += (targetTiltX - tiltCurrentRef.current.x) * lerp
-    tiltCurrentRef.current.y += (targetTiltY - tiltCurrentRef.current.y) * lerp
+    if (dragAxis === 'z') {
+      const targetTiltZ = -pointerTiltRef.current.y * SUBTLE_TILT_Z // mouse X -> roll
+      const targetTiltY = pointerTiltRef.current.x * SUBTLE_TILT_Y // mouse Y -> yaw
+      tiltCurrentRef.current.z += (targetTiltZ - tiltCurrentRef.current.z) * lerp
+      tiltCurrentRef.current.y += (targetTiltY - tiltCurrentRef.current.y) * lerp
+      tiltCurrentRef.current.x += (0 - tiltCurrentRef.current.x) * lerp
+    } else {
+      const targetTiltX = pointerTiltRef.current.x * POINTER_TILT_X
+      const targetTiltY = pointerTiltRef.current.y * POINTER_TILT_Y
+      tiltCurrentRef.current.x += (targetTiltX - tiltCurrentRef.current.x) * lerp
+      tiltCurrentRef.current.y += (targetTiltY - tiltCurrentRef.current.y) * lerp
+      tiltCurrentRef.current.z += (0 - tiltCurrentRef.current.z) * lerp
+    }
 
     let t = enableIntro ? 0 : 1
     if (enableIntro && introStartRef?.current != null) {
@@ -111,24 +225,89 @@ function HeroModel({
     }
 
     const scrollRotation = scrollYRef ? -(scrollYRef.current / 4000) * Math.PI * 2 : 0
-    const scriptedY = START_Y_ROTATION + (REST_Y_ROTATION - START_Y_ROTATION) * t
-    groupRef.current.rotation.y =
-      scriptedY + dragCurrentRef.current + scrollRotation + tiltCurrentRef.current.y
-    groupRef.current.rotation.x = END_X_ROTATION + tiltCurrentRef.current.x
+    const baseX = baseRotation?.[0] ?? END_X_ROTATION
+    const baseY = baseRotation?.[1] ?? REST_Y_ROTATION
+    const baseZ = baseRotation?.[2] ?? 0
+    // Scripted intro: by default we lerp Y from START_Y_ROTATION -> baseY
+    // (the homepage hero behaviour). When introAxis==='z' we instead lerp
+    // Z from (baseZ + introStartOffset) -> baseZ, used for the coin which
+    // enters spun on its depth axis.
+    const introIsZ = introAxis === 'z'
+    const scriptedY = !introIsZ && enableIntro
+      ? START_Y_ROTATION + (baseY - START_Y_ROTATION) * t
+      : baseY
+    const introZStart = baseZ + (introStartOffset ?? 1.6)
+    const scriptedZ = introIsZ && enableIntro
+      ? introZStart + (baseZ - introZStart) * t
+      : baseZ
+    // Drag axis routing.
+    if (dragAxis === 'x') {
+      groupRef.current.rotation.y = scriptedY + scrollRotation + tiltCurrentRef.current.y
+      groupRef.current.rotation.x = baseX + dragCurrentRef.current + tiltCurrentRef.current.x
+      groupRef.current.rotation.z = scriptedZ + tiltCurrentRef.current.z
+    } else if (dragAxis === 'z') {
+      groupRef.current.rotation.y = scriptedY + scrollRotation + tiltCurrentRef.current.y
+      groupRef.current.rotation.x = baseX + tiltCurrentRef.current.x
+      groupRef.current.rotation.z = scriptedZ + dragCurrentRef.current + tiltCurrentRef.current.z
+    } else {
+      groupRef.current.rotation.y =
+        scriptedY + dragCurrentRef.current + scrollRotation + tiltCurrentRef.current.y
+      groupRef.current.rotation.x = baseX + tiltCurrentRef.current.x
+      groupRef.current.rotation.z = scriptedZ + tiltCurrentRef.current.z
+    }
     groupRef.current.position.z = REST_Z
     groupRef.current.position.y = restY
   })
+
+  const initialBaseX = baseRotation?.[0] ?? END_X_ROTATION
+  const initialBaseY = baseRotation?.[1] ?? REST_Y_ROTATION
+  const initialBaseZ = baseRotation?.[2] ?? 0
+  const introIsZInit = introAxis === 'z'
+  const initialY = enableIntro && !introIsZInit ? START_Y_ROTATION : initialBaseY
+  const initialZ = enableIntro && introIsZInit
+    ? initialBaseZ + (introStartOffset ?? 1.6)
+    : initialBaseZ
 
   return (
     <group
       ref={groupRef}
       scale={scale}
       position={[0, restY, REST_Z]}
-      rotation={[END_X_ROTATION, enableIntro ? START_Y_ROTATION : REST_Y_ROTATION, 0]}
+      rotation={[initialBaseX, initialY, initialZ]}
     >
-      <primitive object={scene} />
+      <primitive object={clonedScene} />
     </group>
   )
+}
+
+// Lightweight, procedurally-generated PBR environment. We use this on
+// low-power / mobile devices where the full HDR <Environment preset>
+// is too heavy. Without an env map, metallic materials read as flat
+// black on phones — RoomEnvironment gives them something to reflect
+// without any network fetch.
+function ProceduralEnv() {
+  const { gl, scene } = useThree()
+  useEffect(() => {
+    let envTex
+    let pmrem
+    let cancelled = false
+    import('three/examples/jsm/environments/RoomEnvironment.js').then(
+      ({ RoomEnvironment }) => {
+        if (cancelled) return
+        pmrem = new PMREMGenerator(gl)
+        const room = new RoomEnvironment()
+        envTex = pmrem.fromScene(room, 0.04).texture
+        scene.environment = envTex
+      },
+    )
+    return () => {
+      cancelled = true
+      if (envTex) envTex.dispose()
+      if (pmrem) pmrem.dispose()
+      scene.environment = null
+    }
+  }, [gl, scene])
+  return null
 }
 
 /**
@@ -139,6 +318,35 @@ function HeroModel({
  *  - modelUrl: optional override (defaults to the cached homepage model).
  *  - introStartRef: optional ref carrying the intro start timestamp.
  *      When omitted (inner pages), the model snaps to its rest pose.
+ *  - baseRotation: [x, y, z] in radians — per-model rest pose. Defaults
+ *      to the homepage hero values. Use for models that need a different
+ *      orientation (e.g. a coin lying flat needs an X tilt to face camera).
+ *  - scaleMultiplier: number (default 1) — scales the auto-fit size.
+ *      Use values < 1 for models that fill the viewport too aggressively.
+ *  - mobileOnlyScale: boolean (default false) — only apply scaleMultiplier
+ *      on mobile viewports (≤ 768px). Use when a model is correctly
+ *      sized on desktop but needs enlarging on phones.
+ *  - mobileScaleMultiplier: number — overrides scaleMultiplier on mobile.
+ *      Use to set independent sizes for desktop vs. phones.
+ *  - yOffset/mobileYOffset: optional world-space vertical offsets for
+ *      per-model framing. Positive values move the model upward.
+ *  - centerVertically: boolean (default false) — anchor the model by its
+ *      centre instead of resting it on the bottom of the viewport.
+ *  - dragAxis: 'x' | 'y' | 'z' (default 'y') — which rotation axis
+ *      receives pointer drag. 'z' also switches parallax to a subtle
+ *      Z+Y blend (used by the about-page coin).
+ *  - frontLight: boolean (default false) — add a directional light
+ *      placed along the camera axis so a model's front face reads bright.
+ *  - introAxis: 'y' | 'z' (default 'y') — which axis the scripted intro
+ *      animates. 'z' starts the model rolled around its depth axis and
+ *      eases back to its rest pose.
+ *  - introStartOffset: number (radians, default 1.6 for 'z') — how far
+ *      off the rest pose the intro starts on its chosen axis.
+ *  - ambientIntensity, keyLightIntensity, fillLightIntensity,
+ *      frontLightIntensity, rimLightIntensity: optional light overrides.
+ *  - materialColor/materialMetalness/materialRoughness/materialEnvMapIntensity:
+ *      optional per-instance material lift for dark metallic GLBs.
+ *  - materialEmissive/materialEmissiveIntensity: optional soft self-fill.
  */
 export default function HeroScene({
   title,
@@ -146,13 +354,38 @@ export default function HeroScene({
   eyebrow,
   modelUrl: modelUrlProp,
   introStartRef,
+  baseRotation,
+  scaleMultiplier,
+  mobileOnlyScale,
+  mobileScaleMultiplier,
+  yOffset,
+  mobileYOffset,
+  centerVertically,
+  dragAxis,
+  frontLight,
+  ambientIntensity,
+  keyLightIntensity,
+  fillLightIntensity,
+  frontLightIntensity,
+  rimLightIntensity,
+  materialColor,
+  materialMetalness,
+  materialRoughness,
+  materialEnvMapIntensity,
+  materialEmissive,
+  materialEmissiveIntensity,
+  toneMappingExposure,
+  introAxis,
+  introStartOffset,
 }) {
   const enableIntro = Boolean(introStartRef)
-  // Always start with the cached blob URL (resolved via heroModelPromise) when
-  // no override is provided. Using the raw HERO_MODEL_URL initially and then
-  // swapping causes useGLTF to load twice and can leave the canvas blank
-  // after a page switch.
-  const [modelUrl, setModelUrl] = useState(modelUrlProp || null)
+  // If the cached blob URL is already resolved (true on every navigation
+  // after the homepage), seed state synchronously so the Canvas mounts on
+  // the very first render with a valid URL — no microtask round-trip,
+  // no "blank canvas until reload" race after a route switch.
+  const [modelUrl, setModelUrl] = useState(
+    modelUrlProp || (getHeroModelReady() ? getHeroModelUrl() : null),
+  )
   const [, setIsSceneReady] = useState(false)
   const [frameloop, setFrameloop] = useState('always')
   const dragCurrentRef = useRef(0)
@@ -170,17 +403,32 @@ export default function HeroScene({
     }),
     [],
   )
+  const ambientLightIntensity = ambientIntensity ?? (deviceProfile.lowPower ? 1.35 : 1.15)
+  const keyLight = keyLightIntensity ?? (deviceProfile.lowPower ? 2.6 : 2.3)
+  const fillLight = fillLightIntensity ?? (deviceProfile.lowPower ? 1.5 : 1.25)
+  const frontLightValue = frontLightIntensity ?? (deviceProfile.lowPower ? 2.4 : 2.0)
 
-  // Pause render loop when offscreen.
+  // Pause render loop when offscreen — but only AFTER the canvas has
+  // had time to mount and render its first frames. If we attach the
+  // observer immediately, the new live page's canvas (which mounts
+  // beneath the fixed exit overlay during a route switch) can be
+  // mis-measured and pinned to frameloop="never" before it ever paints,
+  // leaving the model invisible until a manual reload.
   useEffect(() => {
     const node = heroSectionRef.current
     if (!node || typeof IntersectionObserver === 'undefined') return
-    const io = new IntersectionObserver(
-      ([entry]) => setFrameloop(entry.isIntersecting ? 'always' : 'never'),
-      { threshold: 0.01 },
-    )
-    io.observe(node)
-    return () => io.disconnect()
+    let io
+    const startTimer = setTimeout(() => {
+      io = new IntersectionObserver(
+        ([entry]) => setFrameloop(entry.isIntersecting ? 'always' : 'never'),
+        { threshold: 0.01 },
+      )
+      io.observe(node)
+    }, 2000)
+    return () => {
+      clearTimeout(startTimer)
+      io?.disconnect()
+    }
   }, [])
 
   // Scroll → model rotation hook (homepage uses this; harmless on inner pages).
@@ -307,17 +555,34 @@ export default function HeroScene({
               preserveDrawingBuffer: false,
               failIfMajorPerformanceCaveat: false,
             }}
+            onCreated={({ gl }) => {
+              if (toneMappingExposure != null) {
+                gl.toneMappingExposure = toneMappingExposure
+              }
+            }}
             performance={{ min: 0.5 }}
           >
-            <ambientLight intensity={deviceProfile.lowPower ? 1.35 : 1.15} />
+            <ambientLight intensity={ambientLightIntensity} />
             <directionalLight
               position={[4, 7, 4]}
-              intensity={deviceProfile.lowPower ? 2.6 : 2.3}
+              intensity={keyLight}
             />
             <directionalLight
               position={[-5, 3, -6]}
-              intensity={deviceProfile.lowPower ? 1.5 : 1.25}
+              intensity={fillLight}
             />
+            {frontLight && (
+              <directionalLight
+                position={[0, 1.5, 12]}
+                intensity={frontLightValue}
+              />
+            )}
+            {rimLightIntensity != null && (
+              <directionalLight
+                position={[0, 5, -9]}
+                intensity={rimLightIntensity}
+              />
+            )}
             <Suspense fallback={null}>
               <HeroModel
                 modelUrl={modelUrl}
@@ -328,8 +593,28 @@ export default function HeroScene({
                 pointerTiltRef={pointerTiltRef}
                 enableIntro={enableIntro}
                 onLoaded={() => setIsSceneReady(true)}
+                baseRotation={baseRotation}
+                scaleMultiplier={scaleMultiplier}
+                mobileOnlyScale={mobileOnlyScale}
+                mobileScaleMultiplier={mobileScaleMultiplier}
+                yOffset={yOffset}
+                mobileYOffset={mobileYOffset}
+                centerVertically={centerVertically}
+                dragAxis={dragAxis}
+                introAxis={introAxis}
+                introStartOffset={introStartOffset}
+                materialColor={materialColor}
+                materialMetalness={materialMetalness}
+                materialRoughness={materialRoughness}
+                materialEnvMapIntensity={materialEnvMapIntensity}
+                materialEmissive={materialEmissive}
+                materialEmissiveIntensity={materialEmissiveIntensity}
               />
-              {!deviceProfile.lowPower && <Environment preset="studio" />}
+              {deviceProfile.lowPower ? (
+                <ProceduralEnv />
+              ) : (
+                <Environment preset="studio" />
+              )}
             </Suspense>
           </Canvas>
         )}

@@ -7,46 +7,6 @@
   width: 100%;
 }
 
-/* Viewport-locked overlay used for the page-switch slide-up animation.
-   Only this 100vw × 100vh card animates; the actual route content below
-   stays at its natural full-document size. */
-.page-exit-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  z-index: 100;
-  overflow: hidden;
-  background: var(--bg);
-  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.18),
-    0 6px 20px rgba(0, 0, 0, 0.10);
-  will-change: transform, border-radius;
-  pointer-events: none;
-  transform-origin: 50% 0%;
-}
-
-:root[data-theme='dark'] .page-exit-overlay {
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.6),
-    0 6px 20px rgba(0, 0, 0, 0.35);
-}
-
-/* Inner wrapper holds the previous page's full document; we translate it
-   up by the scroll snapshot so the overlay shows what the user was
-   actually looking at when they clicked. */
-.page-exit-overlay__inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  will-change: transform;
-}
-
 .hero-section {
   position: relative;
   height: 100vh;
@@ -248,3 +208,4 @@
     font-size: 0.65rem;
   }
 }
+

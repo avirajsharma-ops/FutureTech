@@ -160,4 +160,30 @@
     min-height: 44px;
     min-width: 44px;
   }
+
+  /* Mobile browsers (Chrome/Safari) don't apply SVG `url(#...)` filters
+     to backdrop-filter, so the refraction layer that gives surfaces
+     their chrome shimmer on desktop disappears — leaving cards looking
+     muddy/black against the dark hero canvas. Compensate by pushing
+     the surface tint toward an opaque silver gradient so the panel
+     reads as a bright, polished chrome regardless of what's behind it. */
+  :root {
+    --lg-tint: rgba(255, 255, 255, 0.78);
+    --lg-tint-edge: rgba(255, 255, 255, 0.95);
+    --lg-tint-bottom: rgba(220, 224, 230, 0.6);
+    --lg-border: rgba(255, 255, 255, 0.75);
+  }
+
+  :root[data-theme='dark'] {
+    --lg-tint: rgba(70, 72, 78, 0.85);
+    --lg-tint-edge: rgba(220, 224, 230, 0.55);
+    --lg-tint-bottom: rgba(20, 22, 26, 0.7);
+    --lg-border: rgba(255, 255, 255, 0.28);
+  }
+
+  /* The SVG-distortion ::before is invisible on mobile; hide it so it
+     doesn't dim the surface with its 0.9 opacity overlay. */
+  .liquid-glass::before {
+    display: none;
+  }
 }
