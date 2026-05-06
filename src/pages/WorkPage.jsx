@@ -41,6 +41,8 @@ export default function WorkPage({ introStartRef }) {
         title="Work that ships, scales, and sticks."
         tagline="A glimpse into recent engagements across fintech, infrastructure, and intelligent applications."
         introStartRef={introStartRef}
+        mobileScaleMultiplier={1.42}
+        mobileYOffset={0.24}
         {...SILVER_MODEL_LIGHTING_PROPS}
       />
       <PageShell

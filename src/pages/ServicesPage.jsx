@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useGLTF } from '@react-three/drei'
 import PageShell from './PageShell'
-import HeroScene, { SILVER_MODEL_LIGHTING_PROPS } from '../components/HeroScene'
+import HeroScene from '../components/HeroScene'
 import {
   SERVICES_MODEL_URL,
   servicesModelPromise,
@@ -48,10 +48,9 @@ export default function ServicesPage({ introStartRef }) {
         tagline="From research to production, we architect software that ships, operates, and adapts."
         introStartRef={introStartRef}
         scaleMultiplier={0.86}
-        mobileScaleMultiplier={0.92}
+        mobileScaleMultiplier={1.56}
         yOffset={0.32}
-        mobileYOffset={0.24}
-        {...SILVER_MODEL_LIGHTING_PROPS}
+        mobileYOffset={0.44}
       />
       <PageShell
         eyebrow="What we do"

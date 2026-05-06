@@ -39,11 +39,13 @@ export default function AboutPage({ introStartRef }) {
         // Desktop: shrink down so the coin reads as a hero element, not
         // a wallpaper. Mobile: keep the larger size so it still fills
         // the narrower viewport.
-        scaleMultiplier={0.55}
-        mobileScaleMultiplier={1}
+        scaleMultiplier={0.5}
+        mobileScaleMultiplier={1.48}
+        mobileYOffset={0.28}
         centerVertically
         // The coin's drag rolls it around its Z (depth) axis.
         dragAxis="z"
+        dragDirection={-1}
         {...SILVER_MODEL_LIGHTING_PROPS}
         // Welcome animation: enters spun ~90° to the right on Z, eases
         // back to its rest pose. Armed 1s after the loader/page transition.

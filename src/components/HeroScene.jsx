@@ -335,6 +335,8 @@ function ProceduralEnv() {
  *  - dragAxis: 'x' | 'y' | 'z' (default 'y') — which rotation axis
  *      receives pointer drag. 'z' also switches parallax to a subtle
  *      Z+Y blend (used by the about-page coin).
+ *  - dragDirection: 1 | -1 (default 1) — flips pointer drag direction
+ *      for models whose natural orientation feels inverted.
  *  - frontLight: boolean (default false) — add a directional light
  *      placed along the camera axis so a model's front face reads bright.
  *  - introAxis: 'y' | 'z' (default 'y') — which axis the scripted intro
@@ -362,6 +364,7 @@ export default function HeroScene({
   mobileYOffset,
   centerVertically,
   dragAxis,
+  dragDirection,
   frontLight,
   ambientIntensity,
   keyLightIntensity,
@@ -407,6 +410,19 @@ export default function HeroScene({
   const keyLight = keyLightIntensity ?? (deviceProfile.lowPower ? 2.6 : 2.3)
   const fillLight = fillLightIntensity ?? (deviceProfile.lowPower ? 1.5 : 1.25)
   const frontLightValue = frontLightIntensity ?? (deviceProfile.lowPower ? 2.4 : 2.0)
+
+  const updatePointerTilt = (node, clientX, clientY) => {
+    const rect = node.getBoundingClientRect()
+    const nx = ((clientX - rect.left) / rect.width) * 2 - 1 // -1..1
+    const ny = ((clientY - rect.top) / rect.height) * 2 - 1 // -1..1 (top = -1)
+    pointerTiltRef.current.x = Math.max(-1, Math.min(1, ny))
+    pointerTiltRef.current.y = Math.max(-1, Math.min(1, nx))
+  }
+
+  const resetPointerTilt = () => {
+    pointerTiltRef.current.x = 0
+    pointerTiltRef.current.y = 0
+  }
 
   // Pause render loop when offscreen — but only AFTER the canvas has
   // had time to mount and render its first frames. If we attach the
@@ -462,27 +478,22 @@ export default function HeroScene({
     }
   }, [modelUrlProp])
 
-  // Pointer-driven subtle tilt. Skipped on touch devices.
+  // Pointer-driven subtle tilt. Window mousemove keeps the hero alive
+  // even when the user is not dragging; pointer handlers below also
+  // update it directly so touch-capable laptops and DevTools emulation
+  // still get mouse/pen interaction when those events are available.
   useEffect(() => {
     if (deviceProfile.touch) return
     const node = heroSectionRef.current
     if (!node) return
     const onMove = (e) => {
-      const rect = node.getBoundingClientRect()
-      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1 // -1..1
-      const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1 // -1..1 (top = -1)
-      pointerTiltRef.current.x = Math.max(-1, Math.min(1, ny))
-      pointerTiltRef.current.y = Math.max(-1, Math.min(1, nx))
-    }
-    const onLeave = () => {
-      pointerTiltRef.current.x = 0
-      pointerTiltRef.current.y = 0
+      updatePointerTilt(node, e.clientX, e.clientY)
     }
     window.addEventListener('mousemove', onMove)
-    node.addEventListener('mouseleave', onLeave)
+    node.addEventListener('mouseleave', resetPointerTilt)
     return () => {
       window.removeEventListener('mousemove', onMove)
-      node.removeEventListener('mouseleave', onLeave)
+      node.removeEventListener('mouseleave', resetPointerTilt)
     }
   }, [deviceProfile.touch])
 
@@ -499,6 +510,9 @@ export default function HeroScene({
     }
   }
   const handlePointerMove = (e) => {
+    if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
+      updatePointerTilt(e.currentTarget, e.clientX, e.clientY)
+    }
     if (!pointerRef.current.active) return
     const dx = e.clientX - pointerRef.current.lastX
     if (!pointerRef.current.captured && pointerRef.current.pointerType !== 'mouse') {
@@ -517,9 +531,10 @@ export default function HeroScene({
       }
     }
     pointerRef.current.lastX = e.clientX
+    const dragSign = dragDirection ?? 1
     dragTargetRef.current = Math.max(
       -1.35,
-      Math.min(1.35, dragTargetRef.current + dx * 0.006),
+      Math.min(1.35, dragTargetRef.current + dx * 0.006 * dragSign),
     )
   }
   const handlePointerUp = (e) => {
@@ -531,6 +546,11 @@ export default function HeroScene({
     }
   }
 
+  const handlePointerLeave = (e) => {
+    resetPointerTilt()
+    handlePointerUp(e)
+  }
+
   return (
     <section className="hero-section" ref={heroSectionRef}>
       <div
@@ -539,7 +559,7 @@ export default function HeroScene({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        onPointerLeave={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
       >
         {modelUrl && (
           <Canvas
