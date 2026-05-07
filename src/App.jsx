@@ -10,6 +10,7 @@ import WorkPage from './pages/WorkPage'
 import ServicesPage from './pages/ServicesPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
+import SpadeClonePage from './pages/SpadeClonePage'
 import { HERO_MODEL_URL } from './lib/heroModel'
 import { COIN_MODEL_URL } from './lib/coinModel'
 import { WORK_MODEL_URL } from './lib/workModel'
@@ -48,7 +49,8 @@ export default function App() {
   )
   const [loaderComplete, setLoaderComplete] = useState(false)
   const location = useLocation()
-  const modelIntroPath = getModelIntroPath(location.pathname)
+  const isSpadeClone = location.pathname.replace(/\/+$/, '') === '/spade'
+  const modelIntroPath = isSpadeClone ? null : getModelIntroPath(location.pathname)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -97,13 +99,15 @@ export default function App() {
 
   return (
     <>
-      <Loader
-        onComplete={() => {
-          setLoaderComplete(true)
-        }}
-      />
-      <LiquidGlassDefs />
-      <Header />
+      {!isSpadeClone && (
+        <Loader
+          onComplete={() => {
+            setLoaderComplete(true)
+          }}
+        />
+      )}
+      {!isSpadeClone && <LiquidGlassDefs />}
+      {!isSpadeClone && <Header />}
 
       {/* Cross-fade between routes. mode="wait" lets the outgoing page
           finish fading out before the new one fades in, so the two
@@ -123,12 +127,13 @@ export default function App() {
             <Route path="/services" element={<ServicesPage introStartRef={getIntroRef('/services')} />} />
             <Route path="/about" element={<AboutPage introStartRef={getIntroRef('/about')} />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/spade" element={<SpadeClonePage />} />
             <Route path="*" element={<HomePage introStartRef={getIntroRef('/')} />} />
           </Routes>
         </motion.main>
       </AnimatePresence>
 
-      <Footer />
+      {!isSpadeClone && <Footer />}
     </>
   )
 }

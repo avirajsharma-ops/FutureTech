@@ -333,8 +333,8 @@
   overflow-y: auto;
   transform-origin: center center;
   background: #fff;
-  border-radius: 22px;
-  padding: clamp(28px, 4vw, 44px);
+  border-radius: 32px;
+  padding: 1.2em;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -353,13 +353,13 @@
 
 .team-modal__close {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 1.4em;
+  right: 1.4em;
   width: 36px;
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(255,255,255,1);
   color: inherit;
   font-size: 22px;
   line-height: 1;
@@ -369,22 +369,23 @@
   transition: background 200ms ease, transform 200ms ease;
 }
 .team-modal__close:hover {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(255,255,255,1);
   transform: scale(1.05);
 }
 :root[data-theme='dark'] .team-modal__close {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 1);
 }
 :root[data-theme='dark'] .team-modal__close:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 1);
 }
 
 .team-modal__avatar {
-  width: 140px;
-  height: 140px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 20px;
+  border-radius: 24px;
   flex-shrink: 0;
+  margin-bottom: 1em;
 }
 
 .team-modal__content {
@@ -395,9 +396,10 @@
 }
 
 .team-modal__content h3 {
+  margin: 0;
   font-weight: 600;
   font-size: clamp(1.4rem, 2.4vw, 1.7rem);
-  line-height: 1.1;
+  line-height: 1.15;
   color: #0a0a0a;
 }
 :root[data-theme='dark'] .team-modal__content h3 {
@@ -405,8 +407,9 @@
 }
 
 .team-modal__quote {
+  margin: 0;
   font-size: clamp(0.9rem, 1.35vw, 1rem);
-  line-height: 1.3;
+  line-height: 1.35;
   font-style: italic;
   color: rgba(0, 0, 0, 0.55);
 }
@@ -416,7 +419,9 @@
 }
 
 .team-modal__role {
+  margin: 0;
   font-size: clamp(0.9rem, 1.4vw, 1rem);
+  line-height: 1.3;
   color: rgba(0, 0, 0, 0.55);
 }
 :root[data-theme='dark'] .team-modal__role {
