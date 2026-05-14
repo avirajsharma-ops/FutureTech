@@ -13,6 +13,12 @@
   will-change: opacity, filter, transform;
 }
 
+.site-header.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(calc(-100% - clamp(0.9rem, 2vw, 1.5rem)));
+  pointer-events: none;
+}
+
 /* Blur + fade out during route transitions */
 :root[data-transitioning='true'] .site-header {
   opacity: 0;

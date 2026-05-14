@@ -1,23 +1,66 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import './Header.css'
 
 const NAV_ITEMS = [
   { label: 'Work', to: '/work' },
-  { label: 'Services', to: '/services' },
+  { label: 'News&Events', to: '/news-events' },
   { label: 'About', to: '/about' },
   { label: 'Contact', to: '/contact' },
 ]
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [headerVisible, setHeaderVisible] = useState(true)
+  const lastScrollYRef = useRef(0)
   const location = useLocation()
 
   // Close the drawer whenever the route changes.
   useEffect(() => {
     setMenuOpen(false)
+    setHeaderVisible(true)
+    lastScrollYRef.current = 0
   }, [location.pathname])
+
+  // Hide the header on downward scroll and reveal it on upward scroll.
+  useEffect(() => {
+    if (menuOpen) {
+      setHeaderVisible(true)
+      return undefined
+    }
+
+    let animationFrame = 0
+    lastScrollYRef.current = window.scrollY
+
+    const updateHeaderVisibility = () => {
+      const currentScrollY = window.scrollY
+      const scrollDelta = currentScrollY - lastScrollYRef.current
+
+      if (currentScrollY <= 24) {
+        setHeaderVisible(true)
+      } else if (scrollDelta > 6 && currentScrollY > 96) {
+        setHeaderVisible(false)
+      } else if (scrollDelta < -6) {
+        setHeaderVisible(true)
+      }
+
+      lastScrollYRef.current = currentScrollY
+      animationFrame = 0
+    }
+
+    const handleScroll = () => {
+      if (animationFrame) return
+      animationFrame = window.requestAnimationFrame(updateHeaderVisibility)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame)
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [menuOpen])
 
   // Lock body scroll while the drawer is open.
   useEffect(() => {
@@ -42,7 +85,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="site-header" role="banner">
+      <header className={`site-header${headerVisible ? '' : ' is-hidden'}`} role="banner">
         <div className="site-header__pill liquid-glass liquid-glass--strong liquid-glass--animated">
           <Link to="/" className="site-header__brand">
             <img src="/favicon.png" alt="MW Futuretech logo" className="site-header__logo" />
@@ -115,7 +158,7 @@ export default function Header() {
                   onClick={() => setMenuOpen(false)}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M2 2L14 14M14 2L2 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <path d="M2 2L14 14M14 2L2 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </button>
               </div>

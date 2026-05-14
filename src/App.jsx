@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -20,7 +20,7 @@ import './App.css'
 
 const PAGE_FADE_DURATION = 0.28
 const MODEL_INTRO_ARM_DELAY = 500
-const MODEL_INTRO_PATHS = new Set(['/', '/work', '/services', '/about'])
+const MODEL_INTRO_PATHS = new Set(['/', '/work', '/news-events', '/about'])
 
 // Assets to opportunistically prefetch once the homepage is idle.
 // Non-render-blocking: injected via <link rel="prefetch"> after first paint.
@@ -124,7 +124,8 @@ export default function App() {
           <Routes location={location}>
             <Route path="/" element={<HomePage introStartRef={getIntroRef('/')} />} />
             <Route path="/work" element={<WorkPage introStartRef={getIntroRef('/work')} />} />
-            <Route path="/services" element={<ServicesPage introStartRef={getIntroRef('/services')} />} />
+            <Route path="/news-events" element={<ServicesPage introStartRef={getIntroRef('/news-events')} />} />
+            <Route path="/services" element={<Navigate to="/news-events" replace />} />
             <Route path="/about" element={<AboutPage introStartRef={getIntroRef('/about')} />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/spade" element={<SpadeClonePage />} />

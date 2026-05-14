@@ -3,7 +3,7 @@ import './Footer.css'
 const LINKS = {
   Company: [
     { label: 'Work', href: '#work' },
-    { label: 'Services', href: '#services' },
+    { label: 'News&Events', href: '/news-events' },
     { label: 'About', href: '#about' },
   ],
   Connect: [
