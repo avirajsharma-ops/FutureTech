@@ -116,22 +116,35 @@ function usePinnedScrollProgress(sectionRef) {
 }
 
 function getCardMotion(progress, index, totalCards, prefersReducedMotion) {
+    const depth = totalCards - index - 1
+    const maxDepth = Math.max(totalCards - 1, 1)
+
     if (prefersReducedMotion) {
-        return { opacity: 1, scale: 1, y: 0 }
+        return {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            boxShadow: '0 16px 42px color-mix(in srgb, var(--text) 5%, transparent)',
+        }
     }
 
     const isMobileViewport = typeof window !== 'undefined' && window.innerWidth <= 768
-
     const revealStart = index * 0.08
     const revealEnd = revealStart + 0.13
     const reveal = mapScrollRange(progress, revealStart, revealEnd, 0, 1)
     const settle = mapScrollRange(progress, 0.72 + index * 0.015, 1, 0, 1)
-    const depth = totalCards - index - 1
+    const depthRatio = depth / maxDepth
+    const stackSoftness = clampProgress(progress * 1.1)
+    const shadowLift = Math.round(26 - depthRatio * 11 - stackSoftness * depthRatio * 7)
+    const shadowBlur = Math.round(68 - depthRatio * 18 - stackSoftness * depthRatio * 20)
+    const shadowSpread = Math.round(2 - depthRatio * 3)
+    const shadowStrength = Math.max(3, Math.round(8 - depthRatio * 2 - stackSoftness * depthRatio * 3))
 
     return {
         opacity: mapScrollRange(reveal, 0, 1, 0.78, 1),
         scale: mapScrollRange(reveal, 0, 1, 0.975, 1) - settle * depth * 0.004,
         y: mapScrollRange(reveal, 0, 1, isMobileViewport ? 18 : 42, 0) + settle * depth * 14,
+        boxShadow: `0 ${shadowLift}px ${shadowBlur}px ${shadowSpread}px color-mix(in srgb, var(--text) ${shadowStrength}%, transparent)`,
     }
 }
 

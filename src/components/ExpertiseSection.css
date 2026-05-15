@@ -1,11 +1,11 @@
 .expertise-showcase {
-    --expertise-bg: color-mix(in srgb, var(--bg) 68%, var(--muted) 32%);
-    --expertise-bg-soft: color-mix(in srgb, var(--bg) 82%, var(--muted) 18%);
-    --expertise-hero-text: color-mix(in srgb, var(--surface) 88%, var(--bg) 12%);
-    --expertise-hero-muted: color-mix(in srgb, var(--surface) 88%, var(--text) 12%);
+    --expertise-bg: var(--bg);
+    --expertise-bg-soft: var(--bg);
+    --expertise-hero-text: var(--text);
+    --expertise-hero-muted: color-mix(in srgb, var(--text) 72%, var(--bg) 28%);
     --expertise-card-text: color-mix(in srgb, var(--text) 70%, var(--muted) 30%);
     --expertise-card-muted: color-mix(in srgb, var(--muted) 78%, var(--text) 22%);
-    --expertise-line: color-mix(in srgb, var(--muted) 22%, transparent);
+    --expertise-line: color-mix(in srgb, var(--muted) 48%, transparent);
     --expertise-card-shell: color-mix(in srgb, var(--bg) 58%, var(--muted) 42%);
     --expertise-card-panel: color-mix(in srgb, var(--bg) 82%, var(--surface) 18%);
     --expertise-card-panel-alt: color-mix(in srgb, var(--bg) 74%, var(--surface) 26%);
@@ -17,9 +17,7 @@
     padding-bottom: clamp(4rem, 7vw, 8rem);
     overflow-x: clip;
     isolation: isolate;
-    background:
-        radial-gradient(circle at 50% 16%, color-mix(in srgb, var(--surface) 24%, transparent), transparent 42%),
-        linear-gradient(180deg, var(--expertise-bg-soft) 0%, var(--expertise-bg) 52%, var(--bg) 100%);
+    background: var(--bg);
     color: var(--expertise-hero-text);
 }
 
@@ -46,7 +44,7 @@
         linear-gradient(90deg, var(--expertise-visual-line) 0.0625rem, transparent 0.0625rem);
     background-size: clamp(3.5rem, 6vw, 6.5rem) clamp(3.5rem, 6vw, 6.5rem);
     mask-image: linear-gradient(to bottom, transparent 0%, currentColor 18%, currentColor 72%, transparent 100%);
-    opacity: 0.2;
+    opacity: 0.8;
     pointer-events: none;
 }
 
@@ -126,14 +124,14 @@
     --lg-tint-bottom: color-mix(in srgb, var(--bg) 34%, transparent);
     --lg-border: color-mix(in srgb, var(--surface) 58%, transparent);
     position: sticky;
-    top: clamp(-5.5rem, -5vw, -1.5rem);
+    top: clamp(4.5rem, 10vh, 7rem);
     width: 100%;
-    height: clamp(32rem, 48vw, 52rem);
+    height: min(78vh, clamp(28rem, 42vw, 44rem));
     margin: 0 0 clamp(3.4rem, 5.5vw, 6.2rem);
     overflow: hidden;
     color: var(--expertise-card-text);
     background: var(--expertise-card-shell);
-    box-shadow: 0 clamp(1.2rem, 3vw, 3.8rem) clamp(2rem, 5vw, 6rem) color-mix(in srgb, var(--text) 9%, transparent);
+    box-shadow: 0 clamp(0.9rem, 2.2vw, 1.8rem) clamp(1.4rem, 3.8vw, 3.4rem) color-mix(in srgb, var(--text) 5%, transparent);
     transform-origin: center top;
     will-change: transform, opacity;
 }
@@ -167,6 +165,7 @@
 
 .expertise-card__surface {
     display: flex;
+    position: relative;
     height: 100%;
     flex-direction: column;
     overflow: hidden;
@@ -174,6 +173,17 @@
     background: var(--expertise-card-panel);
     transform: translateZ(0);
     transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), background 240ms ease;
+}
+
+.expertise-card__surface::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: clamp(3.5rem, 8vh, 5.5rem);
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, var(--expertise-card-panel) 58%, var(--expertise-card-panel) 100%);
 }
 
 .expertise-card:hover .expertise-card__surface,
@@ -224,15 +234,17 @@
 .expertise-card__action {
     position: relative;
     display: grid;
-    width: clamp(8rem, 18vw, 18.6rem);
-    height: 100%;
+    width: clamp(7rem, 15vw, 15.5rem);
+    height: calc(100% - clamp(0.9rem, 1.6vw, 1.35rem));
     flex: 0 0 auto;
     place-items: center;
     overflow: hidden;
+    align-self: flex-start;
+    margin-top: clamp(0.55rem, 1vw, 0.85rem);
     border-width: 0 0 0.0625rem 0.0625rem;
     border-style: solid;
     border-color: var(--expertise-line);
-    border-radius: 0 0 0 clamp(1.4rem, 2.6vw, 3rem);
+    border-radius: 0 0 0 clamp(1.1rem, 2vw, 2.2rem);
     color: var(--expertise-card-text);
     text-decoration: none;
     background: transparent;
@@ -245,7 +257,7 @@
 .expertise-card__action-hover {
     position: absolute;
     inset: clamp(0.7rem, 1.25vw, 1.25rem);
-    z-index: 1;
+    z-index: 2;
     display: grid;
     place-items: center;
     border-radius: clamp(1rem, 2vw, 2rem);
@@ -256,13 +268,13 @@
     letter-spacing: 0.08em;
     opacity: 0;
     text-transform: uppercase;
-    transform: scale(0.94);
-    transition: opacity 360ms ease, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(0.35rem) scale(0.94);
+    transition: opacity 260ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .expertise-card__action-arrow {
     position: relative;
-    z-index: 2;
+    z-index: 1;
     width: clamp(2.4rem, 4.4vw, 5rem);
     height: clamp(2.4rem, 4.4vw, 5rem);
     color: currentColor;
@@ -296,24 +308,25 @@
 .expertise-card__action:focus-visible .expertise-card__action-hover,
 .expertise-card:focus-within .expertise-card__action-hover {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
 }
 
 .expertise-card__action:hover .expertise-card__action-arrow,
 .expertise-card__action:focus-visible .expertise-card__action-arrow,
 .expertise-card:focus-within .expertise-card__action-arrow {
-    transform: translate(0.28rem, -0.28rem);
+    opacity: 0;
+    transform: translate(0.4rem, -0.4rem) scale(0.82);
 }
 
 .expertise-card__middle {
     display: grid;
     flex: 1 1 auto;
     grid-template-columns: minmax(0, 0.82fr) minmax(18rem, 0.88fr);
-    align-items: end;
+    align-items: start;
     gap: clamp(1.4rem, 3.2vw, 4rem);
     margin-top: -0.0625rem;
     margin-left: clamp(2.2rem, 4.6vw, 5rem);
-    padding: clamp(2rem, 4vw, 4.5rem) clamp(1.4rem, 2.2vw, 2.5rem) clamp(2rem, 4vw, 4.5rem) clamp(2.2rem, 4.6vw, 5rem);
+    padding: clamp(1.6rem, 3vw, 3.2rem) clamp(1.4rem, 2.2vw, 2.5rem) clamp(4.5rem, 9vh, 6rem) clamp(2.2rem, 4.6vw, 5rem);
     border-top: 0.0625rem solid var(--expertise-line);
     border-left: 0.0625rem solid var(--expertise-line);
     border-top-left-radius: clamp(1.2rem, 2.3vw, 2.6rem);
@@ -325,7 +338,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: clamp(1.6rem, 2.2vw, 2.4rem);
-    padding-bottom: clamp(0.5rem, 1.4vw, 1.5rem);
+    padding-bottom: 0;
 }
 
 .expertise-card__copy p {
@@ -524,14 +537,14 @@
     }
 
     .expertise-showcase__cards {
-        margin-top: calc(-1 * clamp(10rem, 25vh, 14rem));
+        margin-top: calc(-1 * clamp(8rem, 20vh, 11.5rem));
         padding-right: clamp(1.2rem, 4vw, 3rem);
         padding-left: clamp(1.2rem, 4vw, 3rem);
     }
 
     .expertise-card {
-        top: clamp(-3.5rem, -4vw, -1rem);
-        height: clamp(31rem, 58vw, 43rem);
+        top: clamp(4rem, 9vh, 5.75rem);
+        height: min(76vh, clamp(27rem, 52vw, 40rem));
     }
 
     .expertise-card__top h3 {
@@ -570,14 +583,14 @@
     }
 
     .expertise-showcase__cards {
-        margin-top: calc(-1 * clamp(6rem, 18vh, 9.5rem));
+        margin-top: calc(-1 * clamp(4.5rem, 14vh, 7rem));
         padding: 0 clamp(1rem, 4vw, 1.5rem) clamp(2.5rem, 8vw, 4rem);
     }
 
     .expertise-card {
         --lg-radius-card: clamp(1.1rem, 5vw, 1.8rem);
-        top: clamp(0.75rem, 3vw, 1.5rem);
-        height: clamp(39rem, 86vh, 48rem);
+        top: clamp(3rem, 8vh, 4.5rem);
+        height: min(78vh, clamp(34rem, 74vh, 42rem));
         margin-bottom: clamp(3rem, 8vw, 4rem);
     }
 
@@ -649,13 +662,14 @@
     }
 
     .expertise-showcase__cards {
-        margin-top: calc(-1 * clamp(5rem, 16vh, 7.4rem));
+        margin-top: calc(-1 * clamp(4rem, 12vh, 6rem));
         padding-right: clamp(0.8rem, 3.6vw, 1rem);
         padding-left: clamp(0.8rem, 3.6vw, 1rem);
     }
 
     .expertise-card {
-        height: clamp(36rem, 88vh, 43rem);
+        top: clamp(2.75rem, 8vh, 4rem);
+        height: min(80vh, clamp(31rem, 70vh, 38rem));
         margin-bottom: clamp(2.5rem, 9vw, 3.2rem);
     }
 
