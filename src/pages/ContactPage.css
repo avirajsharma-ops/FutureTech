@@ -1,0 +1,262 @@
+.lets-talk-page {
+  min-height: 100svh;
+  width: min(calc(100% - 2rem), 68rem);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(15rem, 0.82fr) minmax(18rem, 1fr);
+  align-items: center;
+  gap: clamp(2.25rem, 5.4vw, 4.5rem);
+  padding: clamp(4.75rem, 6.2vw, 5.65rem) clamp(2rem, 4.2vw, 3.5rem) clamp(2rem, 3.4vw, 2.75rem);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.lets-talk-page * {
+  box-sizing: border-box;
+}
+
+.lets-talk-page__media {
+  width: min(100%, 22.8rem);
+  justify-self: end;
+  border-radius: clamp(1.7rem, 2.5vw, 2.7rem);
+  overflow: hidden;
+  box-shadow: 0 1.25rem 3rem color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.lets-talk-page__media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 0.68;
+  object-fit: cover;
+  object-position: center;
+}
+
+.lets-talk-page__panel {
+  width: min(100%, 21.5rem);
+  justify-self: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.lets-talk-page__logo {
+  width: clamp(2.65rem, 3.6vw, 3.45rem);
+  height: clamp(2.65rem, 3.6vw, 3.45rem);
+  object-fit: contain;
+  margin-bottom: clamp(0.55rem, 1.3vw, 1rem);
+}
+
+.lets-talk-page__panel h1 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2.35rem, 3.6vw, 3.35rem);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.lets-talk-page__panel p {
+  margin: clamp(0.75rem, 1.5vw, 1.3rem) 0 0;
+  color: var(--text);
+  font-size: clamp(0.58rem, 0.82vw, 0.86rem);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.lets-talk-page__panel strong {
+  font-weight: 800;
+}
+
+.lets-talk-page__divider {
+  width: 100%;
+  height: 1px;
+  margin: clamp(1.1rem, 2.1vw, 1.75rem) 0 clamp(1.05rem, 2vw, 1.7rem);
+  background: color-mix(in srgb, var(--text) 42%, transparent);
+}
+
+.lets-talk-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.lets-talk-form__field {
+  display: block;
+  width: 100%;
+}
+
+.lets-talk-form__field span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lets-talk-form input {
+  width: 100%;
+  min-height: clamp(2.55rem, 3.7vw, 3.05rem);
+  padding: 0 clamp(0.8rem, 1.35vw, 1.1rem);
+  border: 1px solid color-mix(in srgb, var(--journey-accent) 64%, transparent);
+  border-radius: clamp(0.35rem, 0.6vw, 0.5rem);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: clamp(0.74rem, 0.92vw, 0.9rem);
+  font-weight: 300;
+  line-height: 1;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.lets-talk-form input::placeholder {
+  color: color-mix(in srgb, var(--text) 42%, transparent);
+}
+
+.lets-talk-form input:focus {
+  border-color: var(--journey-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--journey-accent) 16%, transparent);
+}
+
+.lets-talk-form__or {
+  display: block;
+  margin: clamp(0.72rem, 1.45vw, 1.1rem) 0;
+  color: var(--text);
+  font-size: clamp(0.95rem, 1.5vw, 1.35rem);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
+.lets-talk-form button {
+  width: 100%;
+  min-height: clamp(2.65rem, 3.8vw, 3.1rem);
+  margin-top: clamp(1.25rem, 2.25vw, 1.8rem);
+  border: 0;
+  border-radius: clamp(0.35rem, 0.6vw, 0.5rem);
+  background: var(--journey-accent);
+  color: var(--bg);
+  font: inherit;
+  font-size: clamp(0.92rem, 1.22vw, 1.1rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.lets-talk-form button:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--journey-accent) 88%, var(--text));
+}
+
+.lets-talk-form button:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.lets-talk-form button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 4px;
+}
+
+@media (max-width: 1024px) {
+  .lets-talk-page {
+    width: min(calc(100% - 2rem), 58rem);
+    grid-template-columns: minmax(13rem, 0.82fr) minmax(17rem, 1fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    padding: clamp(4.75rem, 8vw, 5.5rem) clamp(1.5rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3rem);
+  }
+
+  .lets-talk-page__media {
+    width: min(100%, 20rem);
+  }
+
+  .lets-talk-page__panel h1 {
+    font-size: clamp(2.2rem, 4.3vw, 3rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .lets-talk-page {
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 5vw, 2.4rem);
+    padding: clamp(4.75rem, 14vw, 6rem) clamp(1rem, 5vw, 1.75rem) clamp(2rem, 6vw, 3rem);
+    overflow: visible;
+  }
+
+  .lets-talk-page__media {
+    width: min(100%, 21rem);
+    max-height: 34svh;
+    justify-self: center;
+    border-radius: clamp(1.4rem, 6vw, 2.35rem);
+  }
+
+  .lets-talk-page__media img {
+    aspect-ratio: 1.18;
+    object-position: center 72%;
+  }
+
+  .lets-talk-page__panel {
+    justify-self: center;
+  }
+
+  .lets-talk-page__logo {
+    width: clamp(2.5rem, 9vw, 3.35rem);
+    height: clamp(2.5rem, 9vw, 3.35rem);
+  }
+
+  .lets-talk-page__panel h1 {
+    font-size: clamp(2.25rem, 10vw, 3.25rem);
+    white-space: normal;
+  }
+
+  .lets-talk-page__panel p {
+    font-size: clamp(0.72rem, 2.8vw, 0.95rem);
+  }
+
+  .lets-talk-page__divider {
+    margin: clamp(1rem, 4vw, 1.55rem) 0;
+  }
+
+  .lets-talk-form input,
+  .lets-talk-form button {
+    min-height: clamp(2.75rem, 8vw, 3.2rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .lets-talk-page {
+    padding-inline: 1rem;
+  }
+
+  .lets-talk-page__media {
+    max-height: 30svh;
+  }
+
+  .lets-talk-page__panel h1 {
+    font-size: clamp(2.15rem, 12vw, 2.9rem);
+  }
+
+  .lets-talk-form input {
+    font-size: clamp(0.82rem, 3.8vw, 0.95rem);
+    padding-inline: 0.9rem;
+  }
+
+  .lets-talk-form__or {
+    margin: clamp(0.85rem, 4vw, 1.2rem) 0;
+    font-size: clamp(1rem, 4.4vw, 1.2rem);
+  }
+
+  .lets-talk-form button {
+    margin-top: clamp(1.25rem, 5vw, 1.75rem);
+    font-size: clamp(0.95rem, 4.2vw, 1.1rem);
+  }
+}

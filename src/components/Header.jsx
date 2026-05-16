@@ -7,7 +7,6 @@ const NAV_ITEMS = [
   { label: 'Work', to: '/work' },
   { label: 'News&Events', to: '/news-events' },
   { label: 'About', to: '/about' },
-  { label: 'Contact', to: '/contact' },
 ]
 
 export default function Header() {

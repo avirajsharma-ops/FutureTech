@@ -7,7 +7,6 @@ const LINKS = {
     { label: 'About', href: '#about' },
   ],
   Connect: [
-    { label: 'Contact', href: '#contact' },
     { label: 'LinkedIn', href: 'https://linkedin.com', rel: 'noopener noreferrer', target: '_blank' },
     { label: 'Twitter / X', href: 'https://x.com', rel: 'noopener noreferrer', target: '_blank' },
   ],
