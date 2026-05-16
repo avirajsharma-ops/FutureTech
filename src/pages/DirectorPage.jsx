@@ -8,6 +8,10 @@ import './DirectorPage.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const ELFSIGHT_PLATFORM_ORIGIN = 'https://elfsightcdn.com'
+const ELFSIGHT_PLATFORM_SRC = 'https://elfsightcdn.com/platform.js'
+const AVIRAJ_LINKEDIN_FEED_ID = '115030ed-f866-4296-8d18-dd283d434ede'
+
 const sectionReveal = {
   initial: { opacity: 0, y: 32 },
   whileInView: { opacity: 1, y: 0 },
@@ -54,9 +58,63 @@ function createHeroLayout(containerRect, viewportHeight, headerBottom = 0) {
   }
 }
 
+function injectHeadLink(rel, href, as) {
+  if (typeof document === 'undefined') return
+  if (document.querySelector(`link[rel="${rel}"][href="${href}"]`)) return
+
+  const linkElement = document.createElement('link')
+  linkElement.rel = rel
+  linkElement.href = href
+
+  if (as) {
+    linkElement.as = as
+  }
+
+  if (rel === 'preconnect') {
+    linkElement.crossOrigin = 'anonymous'
+  }
+
+  document.head.appendChild(linkElement)
+}
+
+function DirectorLinkedInFeed() {
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined
+
+    injectHeadLink('dns-prefetch', ELFSIGHT_PLATFORM_ORIGIN)
+    injectHeadLink('preconnect', ELFSIGHT_PLATFORM_ORIGIN)
+    injectHeadLink('preload', ELFSIGHT_PLATFORM_SRC, 'script')
+
+    const existingScript = document.querySelector(`script[src="${ELFSIGHT_PLATFORM_SRC}"]`)
+
+    if (existingScript) return undefined
+
+    const scriptElement = document.createElement('script')
+    scriptElement.src = ELFSIGHT_PLATFORM_SRC
+    scriptElement.async = true
+    scriptElement.fetchPriority = 'high'
+    document.body.appendChild(scriptElement)
+
+    return undefined
+  }, [])
+
+  return (
+    <section className="director-section director-linkedin-feed" aria-label="LinkedIn feed">
+      <motion.div className="director-linkedin-feed__shell" {...sectionReveal}>
+        <div className="director-linkedin-feed__widget">
+          <div
+            className={`elfsight-app-${AVIRAJ_LINKEDIN_FEED_ID}`}
+          />
+        </div>
+      </motion.div>
+    </section>
+  )
+}
+
 export default function DirectorPage() {
   const { directorname = '' } = useParams()
   const profile = getDirectorProfile(directorname)
+  const isAvirajProfile = profile?.slug === 'aviraj-sharma'
   const heroRef = useRef(null)
   const firstNameRef = useRef(null)
   const lastNameRef = useRef(null)
@@ -255,7 +313,7 @@ export default function DirectorPage() {
   }
 
   return (
-    <div className="director-page">
+    <div className={`director-page${isAvirajProfile ? ' director-page--aviraj' : ''}`}>
       <h1 className="director-page__sr-only">{profile.name}</h1>
 
       <section ref={heroRef} className="director-section director-hero" style={heroLayout}>
@@ -303,18 +361,22 @@ export default function DirectorPage() {
         <div className="director-section__mist" aria-hidden="true" />
       </section>
 
-      <section className="director-section director-story" aria-label="Director statement">
-        <motion.div className="director-portrait director-portrait--story" {...sectionReveal}>
-          <img src={profile.image} alt="" loading="lazy" decoding="async" aria-hidden="true" />
-        </motion.div>
+      {isAvirajProfile ? (
+        <DirectorLinkedInFeed />
+      ) : (
+        <section className="director-section director-story" aria-label="Director statement">
+          <motion.div className="director-portrait director-portrait--story" {...sectionReveal}>
+            <img src={profile.image} alt="" loading="lazy" decoding="async" aria-hidden="true" />
+          </motion.div>
 
-        <motion.div className="director-story__copy" {...sectionReveal}>
-          <p className="director-story__eyebrow">
-            {profile.role} / {profile.organization}
-          </p>
-          <p className="director-story__narrative">{profile.narrative}</p>
-        </motion.div>
-      </section>
+          <motion.div className="director-story__copy" {...sectionReveal}>
+            <p className="director-story__eyebrow">
+              {profile.role} / {profile.organization}
+            </p>
+            <p className="director-story__narrative">{profile.narrative}</p>
+          </motion.div>
+        </section>
+      )}
     </div>
   )
 }

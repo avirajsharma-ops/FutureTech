@@ -261,6 +261,29 @@ body:has(.director-page) .site-footer {
   color: color-mix(in srgb, var(--text) 68%, transparent);
 }
 
+.director-page--aviraj .director-hero {
+  padding-bottom: clamp(2rem, 4vw, 3.25rem);
+}
+
+.director-linkedin-feed {
+  padding: clamp(2.75rem, 5vw, 5rem) clamp(1.25rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2rem);
+}
+
+.director-linkedin-feed__shell {
+  width: min(100%, 82rem);
+  margin: 0 auto;
+}
+
+.director-linkedin-feed__widget {
+  width: 100%;
+  min-height: clamp(26rem, 54vw, 42rem);
+}
+
+.director-linkedin-feed__widget > [class^='elfsight-app-'] {
+  display: block;
+  min-height: inherit;
+}
+
 @media (max-width: 1024px) {
   .director-section {
     padding-inline: clamp(1rem, 4vw, 2rem);
@@ -291,6 +314,10 @@ body:has(.director-page) .site-footer {
   .director-story__copy {
     max-width: 44rem;
     padding-bottom: 0;
+  }
+
+  .director-linkedin-feed__widget {
+    min-height: clamp(24rem, 66vw, 38rem);
   }
 
   .director-story__narrative {
@@ -345,6 +372,14 @@ body:has(.director-page) .site-footer {
     margin-left: 0;
     margin-right: 0;
     font-size: clamp(0.96rem, 3.6vw, 1.05rem);
+  }
+
+  .director-linkedin-feed {
+    padding: clamp(2rem, 8vw, 3.5rem) clamp(1rem, 5vw, 1.5rem) clamp(1rem, 4vw, 1.5rem);
+  }
+
+  .director-linkedin-feed__widget {
+    min-height: clamp(22rem, 92vw, 34rem);
   }
 
   .director-section__mist {
