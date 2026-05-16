@@ -1,5 +1,6 @@
 import HeroScene, { SILVER_MODEL_LIGHTING_PROPS } from '../components/HeroScene'
 import FutureScrollReveal from '../components/FutureScrollReveal'
+import HomeJourney from '../components/HomeJourney'
 
 export default function HomePage({ introStartRef }) {
   return (
@@ -11,6 +12,7 @@ export default function HomePage({ introStartRef }) {
         {...SILVER_MODEL_LIGHTING_PROPS}
       />
       <FutureScrollReveal />
+      <HomeJourney />
     </div>
   )
 }

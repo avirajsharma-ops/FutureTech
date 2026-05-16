@@ -10,6 +10,16 @@
   --director-ghost: #ece7df;
   --director-shadow: #c4a17b40;
   --director-mist: #fdfcf7f0;
+  --journey-accent: #2368e8;
+  --journey-accent-bright: #69a7ff;
+  --journey-dot: #2368e8;
+  --journey-rail: #b7c4d7;
+  --journey-rail-soft: #dbe4f0;
+  --journey-mist: #eef3f8;
+  --journey-glow: #b9d7ff5c;
+  --journey-glow-strong: #2368e88f;
+  --journey-card-shadow: #60708326;
+  --journey-card-shadow-strong: #2368e838;
   color-scheme: light;
 }
 
@@ -25,6 +35,16 @@
   --director-ghost: #15110d;
   --director-shadow: #00000073;
   --director-mist: #050505eb;
+  --journey-accent: #8fb8ff;
+  --journey-accent-bright: #d7e8ff;
+  --journey-dot: #8fb8ff;
+  --journey-rail: #48566a;
+  --journey-rail-soft: #1c2430;
+  --journey-mist: #090d12;
+  --journey-glow: #1d4f9c66;
+  --journey-glow-strong: #8fb8ff8c;
+  --journey-card-shadow: #00000075;
+  --journey-card-shadow-strong: #234e8c75;
   color-scheme: dark;
 }
 

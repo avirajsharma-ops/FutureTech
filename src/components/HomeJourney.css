@@ -1,0 +1,279 @@
+.home-journey {
+  --journey-card-width: clamp(15rem, 23vw, 19rem);
+  --journey-text-lift: clamp(5.75rem, 8vw, 7.25rem);
+  position: relative;
+  z-index: 2;
+  height: 300vh;
+  min-height: 92rem;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  overflow: clip visible;
+}
+
+.home-journey * {
+  box-sizing: border-box;
+}
+
+.home-journey__sticky {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  min-height: 100vh;
+  padding: clamp(5.5rem, 10vh, 8rem) 0 clamp(3rem, 7vh, 5rem);
+  overflow: hidden;
+}
+
+.home-journey__header {
+  position: relative;
+  z-index: 4;
+  text-align: center;
+}
+
+.home-journey__eyebrow {
+  margin: 0 0 clamp(0.75rem, 1.4vw, 1rem);
+  color: var(--muted);
+  font-size: clamp(0.72rem, 0.85vw, 0.86rem);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.home-journey__title {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2.25rem, 5.6vw, 5.9rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.98;
+}
+
+.home-journey__title span {
+  color: var(--journey-accent);
+  background: linear-gradient(120deg, var(--journey-accent), var(--journey-accent-bright));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.home-journey__stage {
+  --journey-rail-bottom: clamp(3rem, 7vh, 5.75rem);
+  --journey-rail-width: 112vw;
+  --journey-rail-height: clamp(9rem, 18vw, 15rem);
+  position: relative;
+  width: 100vw;
+  min-height: clamp(32rem, 58vh, 42rem);
+  margin: clamp(2rem, 5vh, 4rem) auto 0;
+}
+
+.home-journey__rail {
+  position: absolute;
+  left: 50%;
+  bottom: var(--journey-rail-bottom);
+  width: var(--journey-rail-width);
+  height: var(--journey-rail-height);
+  color: var(--journey-rail);
+  overflow: visible;
+  transform: translateX(-50%);
+}
+
+.home-journey__rail-path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  opacity: 0.8;
+}
+
+.home-journey__rail-path--ghost {
+  stroke: var(--journey-rail-soft);
+  stroke-width: 16;
+  opacity: 0.28;
+}
+
+.home-journey__rail-ticks line {
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.5;
+  stroke-linecap: round;
+}
+
+.home-journey__rail-checkpoint path,
+.home-journey__rail-bead path {
+  fill: none;
+  stroke: var(--journey-dot);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.38;
+  transition: opacity 180ms ease, stroke-width 180ms ease;
+}
+
+.home-journey__rail-checkpoint.is-active path {
+  opacity: 0.95;
+  stroke-width: 5;
+}
+
+.home-journey__rail-bead path {
+  stroke: var(--journey-accent);
+  stroke-width: 6;
+  opacity: 1;
+  filter: drop-shadow(0 0 0.85rem var(--journey-glow-strong));
+}
+
+.home-journey__cards {
+  position: absolute;
+  left: 50%;
+  bottom: var(--journey-rail-bottom);
+  width: var(--journey-rail-width);
+  height: var(--journey-rail-height);
+  transform: translateX(-50%);
+  perspective: 1100px;
+  pointer-events: none;
+}
+
+.home-journey__card {
+  position: absolute;
+  top: 0;
+  left: calc(50% - (var(--journey-card-width) / 2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--journey-card-width);
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  transform-origin: center bottom;
+  cursor: pointer;
+  will-change: transform, opacity;
+  pointer-events: auto;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home-journey__card:focus-visible {
+  outline: 2px solid var(--journey-accent);
+  outline-offset: clamp(0.5rem, 1.2vw, 0.9rem);
+}
+
+.home-journey__icon {
+  display: block;
+  margin-bottom: clamp(0.65rem, 1.2vw, 0.9rem);
+  color: color-mix(in srgb, var(--journey-accent) 82%, var(--text));
+  font-size: clamp(0.74rem, 0.95vw, 0.96rem);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.home-journey__kicker {
+  color: var(--journey-accent);
+  font-size: clamp(0.72rem, 0.85vw, 0.86rem);
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.home-journey__card strong {
+  display: block;
+  margin-top: clamp(0.45rem, 0.9vw, 0.65rem);
+  color: var(--text);
+  font-size: clamp(1.15rem, 1.55vw, 1.45rem);
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 1.08;
+}
+
+.home-journey__body {
+  display: block;
+  margin-top: clamp(0.7rem, 1.2vw, 0.9rem);
+  color: var(--muted);
+  font-size: clamp(0.82rem, 0.95vw, 0.98rem);
+  font-weight: 620;
+  line-height: 1.55;
+}
+
+@media (max-width: 1024px) {
+  .home-journey {
+    --journey-card-width: clamp(14.5rem, 32vw, 18rem);
+    --journey-text-lift: clamp(5.5rem, 9vw, 7rem);
+    height: 310vh;
+    min-height: 88rem;
+  }
+
+  .home-journey__sticky {
+    padding-top: clamp(5rem, 9vh, 7rem);
+  }
+
+  .home-journey__stage {
+    --journey-rail-width: 122vw;
+    width: min(100%, 68rem);
+    min-height: clamp(31rem, 58vh, 39rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .home-journey {
+    --journey-card-width: min(78vw, 20rem);
+    --journey-text-lift: clamp(5.15rem, 15vw, 6.5rem);
+    height: 325vh;
+    min-height: 92rem;
+  }
+
+  .home-journey__sticky {
+    padding: clamp(4.75rem, 9vh, 6rem) 0 clamp(2.5rem, 6vh, 4rem);
+  }
+
+  .home-journey__title {
+    font-size: clamp(2.05rem, 10vw, 4.1rem);
+  }
+
+  .home-journey__stage {
+    --journey-rail-bottom: clamp(4.2rem, 9vh, 6.3rem);
+    --journey-rail-width: 210vw;
+    --journey-rail-height: clamp(10rem, 32vw, 14rem);
+    min-height: clamp(36rem, 68vh, 43rem);
+    margin-top: clamp(1.75rem, 4vh, 3rem);
+  }
+
+}
+
+@media (max-width: 480px) {
+  .home-journey {
+    --journey-card-width: min(84vw, 19rem);
+    --journey-text-lift: clamp(4.85rem, 21vw, 6rem);
+    min-height: 88rem;
+  }
+
+  .home-journey__eyebrow {
+    font-size: clamp(0.68rem, 3.2vw, 0.78rem);
+  }
+
+  .home-journey__title {
+    font-size: clamp(1.85rem, 11vw, 3.2rem);
+  }
+
+  .home-journey__stage {
+    min-height: clamp(35rem, 70vh, 41rem);
+  }
+
+  .home-journey__card {
+    min-height: 0;
+  }
+
+  .home-journey__rail {
+    width: 245vw;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-journey__rail-checkpoint path,
+  .home-journey__card {
+    transition: none;
+  }
+}
