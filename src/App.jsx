@@ -10,6 +10,7 @@ import WorkPage from './pages/WorkPage'
 import ServicesPage from './pages/ServicesPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
+import DirectorPage from './pages/DirectorPage'
 import SpadeClonePage from './pages/SpadeClonePage'
 import { HERO_MODEL_URL } from './lib/heroModel'
 import { COIN_MODEL_URL } from './lib/coinModel'
@@ -128,6 +129,7 @@ export default function App() {
             <Route path="/services" element={<Navigate to="/news-events" replace />} />
             <Route path="/about" element={<AboutPage introStartRef={getIntroRef('/about')} />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/director/:directorname" element={<DirectorPage />} />
             <Route path="/spade" element={<SpadeClonePage />} />
             <Route path="*" element={<HomePage introStartRef={getIntroRef('/')} />} />
           </Routes>

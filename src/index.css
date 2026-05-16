@@ -5,6 +5,11 @@
   --muted: #3a3a3a;
   --border: #14141426;
   --hero-glow: #e7e3d6;
+  --director-accent: #c4a17b;
+  --director-accent-strong: #b58c60;
+  --director-ghost: #ece7df;
+  --director-shadow: #c4a17b40;
+  --director-mist: #fdfcf7f0;
   color-scheme: light;
 }
 
@@ -15,6 +20,11 @@
   --muted: #bbbbbb;
   --border: #ffffff2b;
   --hero-glow: #1a1a1a;
+  --director-accent: #d9b48b;
+  --director-accent-strong: #e3c49e;
+  --director-ghost: #15110d;
+  --director-shadow: #00000073;
+  --director-mist: #050505eb;
   color-scheme: dark;
 }
 
