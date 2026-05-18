@@ -1,84 +1,88 @@
 .lets-talk-page {
   min-height: 100svh;
-  width: min(calc(100% - 2rem), 68rem);
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(15rem, 0.82fr) minmax(18rem, 1fr);
-  align-items: center;
-  gap: clamp(2.25rem, 5.4vw, 4.5rem);
-  padding: clamp(4.75rem, 6.2vw, 5.65rem) clamp(2rem, 4.2vw, 3.5rem) clamp(2rem, 3.4vw, 2.75rem);
-  background: var(--bg);
-  color: var(--text);
-  overflow: hidden;
+  place-items: center;
+  padding: clamp(5.75rem, 8vw, 7rem) clamp(1rem, 4vw, 2rem) clamp(2rem, 5vw, 4rem);
+  background: var(--contact-page-bg);
+  color: var(--contact-card-text);
+  overflow-x: clip;
 }
 
 .lets-talk-page * {
   box-sizing: border-box;
 }
 
-.lets-talk-page__media {
-  width: min(100%, 22.8rem);
-  justify-self: end;
-  border-radius: clamp(1.7rem, 2.5vw, 2.7rem);
+.lets-talk-page__frame {
+  position: relative;
+  container-type: inline-size;
+  width: min(100%, 70rem, calc((100svh - clamp(5.75rem, 8vw, 7rem) - clamp(2rem, 5vw, 4rem)) * 1.551));
+  aspect-ratio: 1120 / 722;
   overflow: hidden;
-  box-shadow: 0 1.25rem 3rem color-mix(in srgb, var(--text) 10%, transparent);
+  border-radius: clamp(1.9rem, 3.2vw, 2.85rem);
+  background: var(--contact-card-bg);
+  box-shadow: 0 clamp(1rem, 4vw, 2.25rem) clamp(2rem, 6vw, 4rem) var(--contact-frame-shadow);
+}
+
+.lets-talk-page__media {
+  position: absolute;
+  inset: 0.625rem auto 0.625rem 0.625rem;
+  width: 42.62%;
+  border-radius: clamp(1.7rem, 3vw, 2.5rem);
+  overflow: hidden;
+  background: var(--contact-card-text);
 }
 
 .lets-talk-page__media img {
   display: block;
   width: 100%;
-  aspect-ratio: 0.68;
+  height: 100%;
   object-fit: cover;
   object-position: center;
 }
 
 .lets-talk-page__panel {
-  width: min(100%, 21.5rem);
-  justify-self: start;
+  position: absolute;
+  top: 10.58%;
+  left: 50.12%;
+  width: 48.98%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  color: var(--contact-card-text);
 }
 
 .lets-talk-page__logo {
-  width: clamp(2.65rem, 3.6vw, 3.45rem);
-  height: clamp(2.65rem, 3.6vw, 3.45rem);
+  width: clamp(2.4rem, 6.02cqw, 4.22rem);
+  height: clamp(2.4rem, 6.02cqw, 4.22rem);
   object-fit: contain;
-  margin-bottom: clamp(0.55rem, 1.3vw, 1rem);
+  margin: 0;
 }
 
 .lets-talk-page__panel h1 {
-  margin: 0;
-  color: var(--text);
-  font-size: clamp(2.35rem, 3.6vw, 3.35rem);
-  font-weight: 500;
-  line-height: 0.9;
+  margin: clamp(1.3rem, 3.3cqw, 2.32rem) 0 0;
+  color: var(--contact-card-text);
+  font-size: clamp(2rem, 5.36cqw, 3.82rem);
+  font-weight: 400;
+  line-height: 1.02;
   letter-spacing: 0;
   white-space: nowrap;
 }
 
 .lets-talk-page__panel p {
-  margin: clamp(0.75rem, 1.5vw, 1.3rem) 0 0;
-  color: var(--text);
-  font-size: clamp(0.58rem, 0.82vw, 0.86rem);
+  margin: clamp(1.3rem, 3.3cqw, 2.35rem) 0 0;
+  color: var(--contact-card-text);
+  font-size: clamp(0.68rem, 1.25cqw, 0.88rem);
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.25;
 }
 
 .lets-talk-page__panel strong {
   font-weight: 800;
 }
 
-.lets-talk-page__divider {
-  width: 100%;
-  height: 1px;
-  margin: clamp(1.1rem, 2.1vw, 1.75rem) 0 clamp(1.05rem, 2vw, 1.7rem);
-  background: color-mix(in srgb, var(--text) 42%, transparent);
-}
-
 .lets-talk-form {
-  width: 100%;
+  width: 82.16%;
+  margin-top: clamp(1.3rem, 3.2cqw, 2.35rem);
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -103,14 +107,14 @@
 
 .lets-talk-form input {
   width: 100%;
-  min-height: clamp(2.55rem, 3.7vw, 3.05rem);
-  padding: 0 clamp(0.8rem, 1.35vw, 1.1rem);
-  border: 1px solid color-mix(in srgb, var(--journey-accent) 64%, transparent);
-  border-radius: clamp(0.35rem, 0.6vw, 0.5rem);
+  min-height: clamp(2.05rem, 5.15cqw, 3.6rem);
+  padding: 0 clamp(0.8rem, 1.75cqw, 1.3rem);
+  border: 1px solid var(--contact-input-border);
+  border-radius: clamp(0.3rem, 0.8cqw, 0.55rem);
   background: transparent;
-  color: var(--text);
+  color: var(--contact-card-text);
   font: inherit;
-  font-size: clamp(0.74rem, 0.92vw, 0.9rem);
+  font-size: clamp(0.75rem, 1.5cqw, 1rem);
   font-weight: 300;
   line-height: 1;
   outline: none;
@@ -118,35 +122,35 @@
 }
 
 .lets-talk-form input::placeholder {
-  color: color-mix(in srgb, var(--text) 42%, transparent);
+  color: var(--contact-placeholder);
 }
 
 .lets-talk-form input:focus {
-  border-color: var(--journey-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--journey-accent) 16%, transparent);
+  border-color: var(--contact-button-bg);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--contact-button-bg) 16%, transparent);
 }
 
 .lets-talk-form__or {
   display: block;
-  margin: clamp(0.72rem, 1.45vw, 1.1rem) 0;
-  color: var(--text);
-  font-size: clamp(0.95rem, 1.5vw, 1.35rem);
-  font-weight: 600;
+  margin: clamp(1.3rem, 3.2cqw, 2.35rem) 0;
+  color: var(--contact-card-text);
+  font-size: clamp(0.95rem, 2.05cqw, 1.45rem);
+  font-weight: 700;
   line-height: 1;
   text-align: center;
 }
 
 .lets-talk-form button {
   width: 100%;
-  min-height: clamp(2.65rem, 3.8vw, 3.1rem);
-  margin-top: clamp(1.25rem, 2.25vw, 1.8rem);
+  min-height: clamp(2.05rem, 5.15cqw, 3.6rem);
+  margin-top: clamp(1.3rem, 3.2cqw, 2.35rem);
   border: 0;
-  border-radius: clamp(0.35rem, 0.6vw, 0.5rem);
-  background: var(--journey-accent);
-  color: var(--bg);
+  border-radius: clamp(0.3rem, 0.8cqw, 0.55rem);
+  background: var(--contact-button-bg);
+  color: var(--contact-button-text);
   font: inherit;
-  font-size: clamp(0.92rem, 1.22vw, 1.1rem);
-  font-weight: 700;
+  font-size: clamp(0.9rem, 2.15cqw, 1.52rem);
+  font-weight: 800;
   line-height: 1;
   letter-spacing: 0;
   cursor: pointer;
@@ -155,7 +159,7 @@
 
 .lets-talk-form button:hover {
   transform: translateY(-1px);
-  background: color-mix(in srgb, var(--journey-accent) 88%, var(--text));
+  background: color-mix(in srgb, var(--contact-button-bg) 88%, var(--contact-card-text));
 }
 
 .lets-talk-form button:active {
@@ -163,100 +167,124 @@
 }
 
 .lets-talk-form button:focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--contact-card-text);
   outline-offset: 4px;
 }
 
 @media (max-width: 1024px) {
   .lets-talk-page {
-    width: min(calc(100% - 2rem), 58rem);
-    grid-template-columns: minmax(13rem, 0.82fr) minmax(17rem, 1fr);
-    gap: clamp(2rem, 4vw, 3.5rem);
-    padding: clamp(4.75rem, 8vw, 5.5rem) clamp(1.5rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3rem);
+    padding: clamp(5.5rem, 9vw, 6.5rem) clamp(1rem, 3vw, 1.5rem) clamp(2rem, 5vw, 3rem);
   }
 
-  .lets-talk-page__media {
-    width: min(100%, 20rem);
+  .lets-talk-page__frame {
+    width: min(100%, 64rem, calc((100svh - clamp(5.5rem, 9vw, 6.5rem) - clamp(2rem, 5vw, 3rem)) * 1.551));
   }
 
   .lets-talk-page__panel h1 {
-    font-size: clamp(2.2rem, 4.3vw, 3rem);
+    font-size: clamp(2.6rem, 5.15vw, 3.4rem);
   }
 }
 
 @media (max-width: 768px) {
   .lets-talk-page {
+    padding: clamp(5rem, 14vw, 6rem) clamp(1rem, 5vw, 1.5rem) clamp(2rem, 7vw, 3rem);
+  }
+
+  .lets-talk-page__frame {
+    display: grid;
     grid-template-columns: 1fr;
-    gap: clamp(1.5rem, 5vw, 2.4rem);
-    padding: clamp(4.75rem, 14vw, 6rem) clamp(1rem, 5vw, 1.75rem) clamp(2rem, 6vw, 3rem);
-    overflow: visible;
+    gap: clamp(1.6rem, 6vw, 2.4rem);
+    width: min(100%, 34rem);
+    aspect-ratio: auto;
+    padding: clamp(0.62rem, 2.8vw, 1rem) clamp(1rem, 5vw, 1.5rem) clamp(2rem, 7vw, 2.7rem);
+    border-radius: clamp(1.5rem, 7vw, 2.5rem);
   }
 
   .lets-talk-page__media {
-    width: min(100%, 21rem);
+    position: static;
+    width: 100%;
     max-height: 34svh;
-    justify-self: center;
-    border-radius: clamp(1.4rem, 6vw, 2.35rem);
-  }
-
-  .lets-talk-page__media img {
-    aspect-ratio: 1.18;
-    object-position: center 72%;
+    aspect-ratio: 477 / 360;
+    border-radius: clamp(1.25rem, 6vw, 2.1rem);
   }
 
   .lets-talk-page__panel {
+    position: static;
+    width: min(100%, 28.2rem);
     justify-self: center;
   }
 
   .lets-talk-page__logo {
-    width: clamp(2.5rem, 9vw, 3.35rem);
-    height: clamp(2.5rem, 9vw, 3.35rem);
+    width: clamp(3rem, 10vw, 4rem);
+    height: clamp(3rem, 10vw, 4rem);
   }
 
   .lets-talk-page__panel h1 {
-    font-size: clamp(2.25rem, 10vw, 3.25rem);
+    margin-top: clamp(1.55rem, 6vw, 2.15rem);
+    font-size: clamp(2.5rem, 10vw, 3.45rem);
     white-space: normal;
   }
 
   .lets-talk-page__panel p {
-    font-size: clamp(0.72rem, 2.8vw, 0.95rem);
+    margin-top: clamp(1.3rem, 5vw, 2rem);
+    font-size: clamp(0.78rem, 3.1vw, 0.95rem);
   }
 
-  .lets-talk-page__divider {
-    margin: clamp(1rem, 4vw, 1.55rem) 0;
+  .lets-talk-form {
+    width: 100%;
+    margin-top: clamp(1.8rem, 6vw, 2.4rem);
   }
 
   .lets-talk-form input,
   .lets-talk-form button {
-    min-height: clamp(2.75rem, 8vw, 3.2rem);
+    min-height: clamp(3rem, 10vw, 3.6rem);
+  }
+
+  .lets-talk-form__or {
+    margin: clamp(1.5rem, 5vw, 2.1rem) 0;
+  }
+
+  .lets-talk-form button {
+    margin-top: clamp(1.8rem, 6vw, 2.4rem);
   }
 }
 
 @media (max-width: 480px) {
   .lets-talk-page {
-    padding-inline: 1rem;
+    padding-inline: 0.75rem;
+  }
+
+  .lets-talk-page__frame {
+    padding: 0.625rem 0.875rem clamp(1.65rem, 7vw, 2.25rem);
   }
 
   .lets-talk-page__media {
-    max-height: 30svh;
+    max-height: 28svh;
+  }
+
+  .lets-talk-page__logo {
+    width: clamp(2.55rem, 11vw, 3.25rem);
+    height: clamp(2.55rem, 11vw, 3.25rem);
   }
 
   .lets-talk-page__panel h1 {
-    font-size: clamp(2.15rem, 12vw, 2.9rem);
+    font-size: clamp(2.15rem, 12vw, 3rem);
+  }
+
+  .lets-talk-page__panel p {
+    font-size: clamp(0.72rem, 3.6vw, 0.86rem);
   }
 
   .lets-talk-form input {
-    font-size: clamp(0.82rem, 3.8vw, 0.95rem);
-    padding-inline: 0.9rem;
+    font-size: clamp(0.8rem, 4vw, 0.94rem);
+    padding-inline: 0.95rem;
   }
 
   .lets-talk-form__or {
-    margin: clamp(0.85rem, 4vw, 1.2rem) 0;
-    font-size: clamp(1rem, 4.4vw, 1.2rem);
+    font-size: clamp(1rem, 4.8vw, 1.25rem);
   }
 
   .lets-talk-form button {
-    margin-top: clamp(1.25rem, 5vw, 1.75rem);
-    font-size: clamp(0.95rem, 4.2vw, 1.1rem);
+    font-size: clamp(1rem, 5vw, 1.2rem);
   }
 }

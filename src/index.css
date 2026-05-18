@@ -20,6 +20,14 @@
   --journey-glow-strong: #2368e88f;
   --journey-card-shadow: #60708326;
   --journey-card-shadow-strong: #2368e838;
+  --contact-page-bg: #fdfcf7;
+  --contact-card-bg: #ffffff;
+  --contact-card-text: #050505;
+  --contact-placeholder: #a9a9a9;
+  --contact-input-border: #b8ccfb;
+  --contact-button-bg: #205cca;
+  --contact-button-text: #ffffff;
+  --contact-frame-shadow: #6070831c;
   color-scheme: light;
 }
 
@@ -45,6 +53,14 @@
   --journey-glow-strong: #8fb8ff8c;
   --journey-card-shadow: #00000075;
   --journey-card-shadow-strong: #234e8c75;
+  --contact-page-bg: #050505;
+  --contact-card-bg: #fdfcf7;
+  --contact-card-text: #050505;
+  --contact-placeholder: #8d8d8d;
+  --contact-input-border: #9bbcff;
+  --contact-button-bg: #205cca;
+  --contact-button-text: #ffffff;
+  --contact-frame-shadow: #00000073;
   color-scheme: dark;
 }
 
