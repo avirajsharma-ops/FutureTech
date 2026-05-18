@@ -28,6 +28,13 @@
   --contact-button-bg: #205cca;
   --contact-button-text: #ffffff;
   --contact-frame-shadow: #6070831c;
+  --nav-cta-glass-text: #121212;
+  --nav-cta-glass-tint: #ffffffe0;
+  --nav-cta-glass-edge: #fffffffa;
+  --nav-cta-glass-bottom: #ffffff75;
+  --nav-cta-glass-border: #ffffffd9;
+  --nav-cta-glass-shadow: #7f8c9d1f;
+  --nav-cta-glass-shadow-strong: #ffffffd9;
   color-scheme: light;
 }
 
@@ -61,6 +68,13 @@
   --contact-button-bg: #205cca;
   --contact-button-text: #ffffff;
   --contact-frame-shadow: #00000073;
+  --nav-cta-glass-text: #121212;
+  --nav-cta-glass-tint: #ffffffcc;
+  --nav-cta-glass-edge: #fffffff5;
+  --nav-cta-glass-bottom: #ffffff5c;
+  --nav-cta-glass-border: #ffffffb3;
+  --nav-cta-glass-shadow: #00000052;
+  --nav-cta-glass-shadow-strong: #ffffff8c;
   color-scheme: dark;
 }
 

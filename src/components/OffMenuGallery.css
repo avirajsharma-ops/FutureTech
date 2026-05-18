@@ -86,6 +86,9 @@
   backface-visibility: hidden;
   cursor: pointer;
   will-change: transform;
+  border: 0;
+  background: transparent;
+  box-shadow: 0 1.4rem 4rem color-mix(in srgb, var(--text) 16%, transparent);
 }
 
 .offmenu-gallery__sphere-image {
@@ -98,6 +101,143 @@
   object-fit: cover;
   user-select: none;
   pointer-events: none;
+}
+
+.offmenu-project {
+  --project-inset-top: clamp(4.75rem, 7vh, 6rem);
+  --project-inset-inline: clamp(1rem, 4vw, 3rem);
+  --project-inset-bottom: clamp(1rem, 4vh, 2.5rem);
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: auto;
+}
+
+.offmenu-project__backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--hero-glow) 42%, transparent), transparent 44%),
+    color-mix(in srgb, var(--bg) 82%, transparent);
+  cursor: pointer;
+}
+
+.offmenu-project__reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  padding: var(--project-inset-top) var(--project-inset-inline) var(--project-inset-bottom);
+  will-change: clip-path;
+  pointer-events: none;
+}
+
+.offmenu-project__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  width: 100%;
+  height: 100%;
+  padding: clamp(0.75rem, 1.6vw, 1.2rem);
+  overflow: hidden;
+  border-radius: clamp(1.25rem, 3vw, 2.25rem);
+  background: color-mix(in srgb, var(--bg) 92%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+  box-shadow: 0 2rem 6rem color-mix(in srgb, var(--text) 22%, transparent);
+  color: var(--text);
+  transform-origin: center;
+  pointer-events: auto;
+}
+
+.offmenu-project__media {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: clamp(1rem, 2.4vw, 1.75rem);
+  background: #050505;
+}
+
+.offmenu-project__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.offmenu-project__content {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 3.75rem) clamp(1rem, 3.6vw, 3rem) clamp(1rem, 3vw, 2.5rem) 0;
+}
+
+.offmenu-project__content .offmenu-project__close.liquid-glass {
+  position: absolute;
+  top: clamp(0.5rem, 1.4vw, 1rem);
+  right: clamp(0.25rem, 1.4vw, 0.75rem);
+  z-index: 2;
+  width: clamp(2.75rem, 4vw, 3.25rem);
+  height: clamp(2.75rem, 4vw, 3.25rem);
+  padding: 0;
+  border: 0;
+  color: var(--text);
+  font: inherit;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  line-height: 1;
+}
+
+.offmenu-project__eyebrow {
+  margin: 0 0 clamp(0.85rem, 1.8vw, 1.25rem);
+  color: var(--muted);
+  font-size: clamp(0.68rem, 0.9vw, 0.78rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.offmenu-project__content h2 {
+  max-width: 11ch;
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2.6rem, 6vw, 6rem);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 0.94;
+}
+
+.offmenu-project__description {
+  max-width: 42rem;
+  margin: clamp(1.2rem, 3vw, 2rem) 0 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.offmenu-project__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.55rem, 1.2vw, 0.8rem);
+  margin-top: clamp(1.5rem, 3vw, 2.4rem);
+}
+
+.offmenu-project__details span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.72rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 999px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  font-size: clamp(0.78rem, 1vw, 0.9rem);
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .offmenu-gallery__intro {
@@ -217,6 +357,20 @@
   .offmenu-gallery__stage::after {
     height: clamp(6rem, 14vh, 10rem);
   }
+
+  .offmenu-project {
+    --project-inset-top: clamp(4.5rem, 7vh, 5.5rem);
+    --project-inset-inline: clamp(1rem, 3vw, 2rem);
+  }
+
+  .offmenu-project__card {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.9fr);
+    gap: clamp(1rem, 2.5vw, 2rem);
+  }
+
+  .offmenu-project__content h2 {
+    font-size: clamp(2.3rem, 6.5vw, 4.8rem);
+  }
 }
 
 @media (max-width: 768px) {
@@ -242,6 +396,39 @@
     right: 1rem;
     bottom: 1rem;
   }
+
+  .offmenu-project {
+    --project-inset-top: clamp(4.75rem, 10vh, 5.5rem);
+    --project-inset-inline: clamp(0.75rem, 4vw, 1.25rem);
+    --project-inset-bottom: clamp(0.75rem, 4vh, 1.25rem);
+  }
+
+  .offmenu-project__card {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(12rem, 48%) minmax(0, 1fr);
+    gap: clamp(1rem, 4vw, 1.5rem);
+    padding: clamp(0.65rem, 3vw, 0.9rem);
+    overflow-y: auto;
+  }
+
+  .offmenu-project__content {
+    justify-content: flex-start;
+    padding: 0 clamp(0.35rem, 2vw, 0.75rem) clamp(0.75rem, 3vw, 1rem);
+  }
+
+  .offmenu-project__content .offmenu-project__close.liquid-glass {
+    top: clamp(0.85rem, 3vw, 1.1rem);
+    right: clamp(0.85rem, 3vw, 1.1rem);
+  }
+
+  .offmenu-project__content h2 {
+    max-width: 12ch;
+    font-size: clamp(2rem, 10vw, 3.8rem);
+  }
+
+  .offmenu-project__description {
+    font-size: clamp(0.88rem, 3.4vw, 1rem);
+  }
 }
 
 @media (max-width: 480px) {
@@ -261,5 +448,14 @@
 
   .offmenu-gallery__title {
     font-size: clamp(1.5rem, 10vw, 2rem);
+  }
+
+  .offmenu-project__card {
+    grid-template-rows: minmax(10rem, 42%) minmax(0, 1fr);
+  }
+
+  .offmenu-project__details span {
+    width: 100%;
+    justify-content: center;
   }
 }

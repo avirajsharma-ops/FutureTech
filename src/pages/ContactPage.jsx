@@ -12,7 +12,7 @@ export default function ContactPage() {
       >
         <div className="lets-talk-page__media" aria-hidden="true">
           <img
-            src="/contact/contact-figma-media.png"
+            src="/images/contact.gif"
             alt=""
             loading="eager"
             decoding="async"

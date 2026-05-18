@@ -1,16 +1,72 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { motion, useScroll } from 'motion/react'
+import { AnimatePresence, motion, useScroll } from 'motion/react'
 import './OffMenuGallery.css'
 
 const PROJECTS = [
-  { title: 'Resonant', slug: 'resonant', image: 'https://www.offmenu.design/images/work/resonant/thumbnail-light-xs@2x.webp' },
-  { title: 'Control Tower', slug: 'controltower', image: 'https://www.offmenu.design/images/work/controltower/thumbnail-light-xs@2x.webp' },
-  { title: 'Ditto', slug: 'ditto', image: 'https://www.offmenu.design/images/work/ditto/thumbnail-light-xs@2x.webp' },
-  { title: 'Hanover Park', slug: 'hanover-park', image: 'https://www.offmenu.design/images/work/hanover-park/thumbnail-light-xs@2x.webp' },
-  { title: 'Superintelligent', slug: 'super', image: 'https://www.offmenu.design/images/work/super/thumbnail-light-xs@2x.webp' },
-  { title: 'Tenacity', slug: 'tenacity', image: 'https://www.offmenu.design/images/work/tenacity/thumbnail-light-xs@2x.webp' },
-  { title: 'Utility', slug: 'utility', image: 'https://www.offmenu.design/images/work/utility/thumbnail-light-xs@2x.webp' },
-  { title: 'Flex', slug: 'flex', image: 'https://www.offmenu.design/images/work/flex/thumbnail-light-xs@2x.webp' },
+  {
+    title: 'Gurujii AI Companion',
+    slug: 'gurujii-ai-companion',
+    image: '/mockups/Mockup%201.png',
+    category: 'AI avatar experience',
+    description: 'A conversational spiritual guide experience with live face detection, voice interaction, and an immersive mobile-first flow.',
+    details: ['Realtime AI conversation', 'Character-led voice UX', 'Mobile app interface'],
+  },
+  {
+    title: 'Poonam Sagar Wellness',
+    slug: 'poonam-sagar-wellness',
+    image: '/mockups/Mockup%20Scene%204.png',
+    category: 'Health and wellness platform',
+    description: 'A polished digital presence for diet consultation, appointment booking, and conversion-focused wellness discovery.',
+    details: ['Responsive marketing site', 'Appointment funnel', 'Wellness brand system'],
+  },
+  {
+    title: 'Tallo Productivity OS',
+    slug: 'tallo-productivity-os',
+    image: '/mockups/Mockup%20Ribbon%206.png',
+    category: 'AI productivity workspace',
+    description: 'A sharp SaaS interface for planning, visibility, and team workflows, built around fast scanning and confident action.',
+    details: ['SaaS dashboard design', 'Task workflow UX', 'AI planning surface'],
+  },
+  {
+    title: 'MedFlow HMS',
+    slug: 'medflow-hms',
+    image: '/mockups/Mockup%205.png',
+    category: 'Hospital management system',
+    description: 'A hospital operations platform for bed management, role-based access, revenue analytics, and real-time care coordination.',
+    details: ['Operations dashboard', 'Role-based access', 'Revenue analytics'],
+  },
+  {
+    title: 'Mayalogy',
+    slug: 'mayalogy',
+    image: '/mockups/Mockup%207.png',
+    category: 'Astrology AI assistant',
+    description: 'A dual-device conversational astrology product with guided onboarding, Hindi-first content, and a premium dark interface.',
+    details: ['Conversational AI', 'Native mobile flows', 'Hindi-first experience'],
+  },
+  {
+    title: 'AlgaeTree Control Center',
+    slug: 'algaetree-control-center',
+    image: '/mockups/Mockup%2012.png',
+    category: 'IoT monitoring dashboard',
+    description: 'A device control center for bio-reactor monitoring, system health, and environmental controls across connected hardware.',
+    details: ['IoT device controls', 'Sensor health tracking', 'Environmental automation'],
+  },
+  {
+    title: 'Canact Social Motion',
+    slug: 'canact-social-motion',
+    image: '/mockups/Mockup%2013.png',
+    category: 'Social impact mobile app',
+    description: 'A location-aware social product that turns community actions into measurable impact with scores, discovery, and progress loops.',
+    details: ['Location-aware UX', 'Impact scoring', 'Mobile community flows'],
+  },
+  {
+    title: 'DubWala',
+    slug: 'dubwala',
+    image: '/mockups/Mockup%20Scene%206.png',
+    category: 'AI video dubbing tool',
+    description: 'A creator workflow for uploading video or audio, selecting target languages, and generating multilingual voice output.',
+    details: ['AI dubbing workflow', 'Multilingual selection', 'Creator upload system'],
+  },
 ]
 
 const TAU = Math.PI * 2
@@ -104,7 +160,7 @@ function IntroHeading({ progress }) {
   )
 }
 
-function SphereField({ projects, progress, onFocusedIndexChange, rotationRef }) {
+function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, rotationRef }) {
   const rootRef = useRef(null)
   const containerRef = useRef(null)
   const spheresRef = useRef([])
@@ -267,8 +323,20 @@ function SphereField({ projects, progress, onFocusedIndexChange, rotationRef }) 
                 data-sphere-index={index}
                 href={`#${project.slug}`}
                 className="offmenu-gallery__sphere"
-                aria-label={project.title}
-                onClick={(event) => event.preventDefault()}
+                aria-label={`Open ${project.title} project details`}
+                onClick={(event) => {
+                  event.preventDefault()
+                  const origin = event.currentTarget.getBoundingClientRect()
+                  onProjectOpen(project, {
+                    centerX: origin.left + origin.width / 2,
+                    centerY: origin.top + origin.height / 2,
+                    radius: Math.max(origin.width, origin.height) / 2,
+                    endRadius: Math.hypot(
+                      Math.max(origin.left + origin.width / 2, window.innerWidth - (origin.left + origin.width / 2)),
+                      Math.max(origin.top + origin.height / 2, window.innerHeight - (origin.top + origin.height / 2)),
+                    ),
+                  })
+                }}
                 onMouseEnter={() => {
                   hoverIndexRef.current = index
                 }}
@@ -368,11 +436,101 @@ function OrbitalDots({ count, rotationRef }) {
   )
 }
 
+function ProjectDetailOverlay({ activeProject, onClose }) {
+  useEffect(() => {
+    if (!activeProject) return undefined
+
+    const previousOverflow = document.body.style.overflow
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') onClose()
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [activeProject, onClose])
+
+  return (
+    <AnimatePresence>
+      {activeProject && (
+        <motion.div
+          className="offmenu-project"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.28, ease: 'easeOut' }}
+        >
+          <button
+            type="button"
+            className="offmenu-project__backdrop"
+            aria-label="Close project details"
+            onClick={onClose}
+          />
+          <motion.div
+            className="offmenu-project__reveal"
+            initial={{
+              clipPath: `circle(${activeProject.origin.radius}px at ${activeProject.origin.centerX}px ${activeProject.origin.centerY}px)`,
+            }}
+            animate={{
+              clipPath: `circle(${activeProject.origin.endRadius}px at ${activeProject.origin.centerX}px ${activeProject.origin.centerY}px)`,
+            }}
+            exit={{
+              clipPath: `circle(${activeProject.origin.radius}px at ${activeProject.origin.centerX}px ${activeProject.origin.centerY}px)`,
+            }}
+            transition={{ duration: 0.68, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <article
+              className="offmenu-project__card"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={`offmenu-project-title-${activeProject.project.slug}`}
+            >
+              <div className="offmenu-project__media">
+                <img src={activeProject.project.image} alt={`${activeProject.project.title} mockup`} />
+              </div>
+
+              <motion.div
+                className="offmenu-project__content"
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+                transition={{ duration: 0.3, delay: 0.18, ease: 'easeOut' }}
+              >
+                <button
+                  type="button"
+                  className="offmenu-project__close liquid-glass liquid-glass--circle liquid-glass-button"
+                  aria-label="Close project details"
+                  onClick={onClose}
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+                <p className="offmenu-project__eyebrow">{activeProject.project.category}</p>
+                <h2 id={`offmenu-project-title-${activeProject.project.slug}`}>{activeProject.project.title}</h2>
+                <p className="offmenu-project__description">{activeProject.project.description}</p>
+                <div className="offmenu-project__details" aria-label="Project highlights">
+                  {activeProject.project.details.map((detail) => (
+                    <span key={detail}>{detail}</span>
+                  ))}
+                </div>
+              </motion.div>
+            </article>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 export default function OffMenuGallery() {
   const sectionRef = useRef(null)
   const rotationRef = useRef(0)
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [controlsVisible, setControlsVisible] = useState(false)
+  const [activeProject, setActiveProject] = useState(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end end'],
@@ -392,6 +550,7 @@ export default function OffMenuGallery() {
           projects={PROJECTS}
           progress={scrollYProgress}
           onFocusedIndexChange={setFocusedIndex}
+          onProjectOpen={(project, origin) => setActiveProject({ project, origin })}
           rotationRef={rotationRef}
         />
         <div className="offmenu-gallery__intro">
@@ -400,6 +559,7 @@ export default function OffMenuGallery() {
         <WorkTitles projects={PROJECTS} focusedIndex={focusedIndex} visible={controlsVisible} />
         <OrbitalDots count={PROJECTS.length} rotationRef={rotationRef} />
       </div>
+      <ProjectDetailOverlay activeProject={activeProject} onClose={() => setActiveProject(null)} />
     </section>
   )
 }

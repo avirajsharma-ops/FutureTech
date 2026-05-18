@@ -113,6 +113,45 @@
   white-space: nowrap;
 }
 
+.site-header__cta.liquid-glass {
+  --lg-text: var(--nav-cta-glass-text);
+  --lg-tint: var(--nav-cta-glass-tint);
+  --lg-tint-edge: var(--nav-cta-glass-edge);
+  --lg-tint-bottom: var(--nav-cta-glass-bottom);
+  --lg-border: var(--nav-cta-glass-border);
+  --lg-blur: 24px;
+  --lg-saturation: 210%;
+  justify-content: center;
+  min-height: clamp(2.5rem, 3vw, 2.85rem);
+  padding-inline: clamp(1.35rem, 2vw, 1.7rem);
+  color: var(--nav-cta-glass-text);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--nav-cta-glass-edge) 88%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--nav-cta-glass-bottom) 72%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--nav-cta-glass-border) 55%, transparent),
+    0 0.75rem 1.8rem var(--nav-cta-glass-shadow),
+    0 1px 0 var(--nav-cta-glass-shadow-strong);
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--nav-cta-glass-edge) 55%, transparent);
+}
+
+.site-header__cta.liquid-glass::after {
+  top: 2px;
+  left: 12%;
+  right: 12%;
+  height: 58%;
+  filter: blur(8px);
+  opacity: 1;
+}
+
+.site-header__cta.liquid-glass:hover {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--nav-cta-glass-edge) 92%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--nav-cta-glass-bottom) 78%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--nav-cta-glass-border) 65%, transparent),
+    0 0.9rem 2rem var(--nav-cta-glass-shadow),
+    0 1px 0 var(--nav-cta-glass-shadow-strong);
+}
+
 /* ─── Hamburger (hidden on desktop) ─── */
 .site-header__hamburger {
   display: none;
