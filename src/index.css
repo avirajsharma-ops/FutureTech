@@ -28,6 +28,14 @@
   --contact-button-bg: #205cca;
   --contact-button-text: #ffffff;
   --contact-frame-shadow: #6070831c;
+  --footer-surface: #f0f8ff;
+  --footer-surface-edge: #f0f8ff;
+  --footer-surface-bottom: #f0f8ff;
+  --footer-text: #000000;
+  --footer-muted: #000000;
+  --footer-label: #000000;
+  --footer-border: transparent;
+  --footer-shadow: transparent;
   --nav-cta-glass-text: #121212;
   --nav-cta-glass-tint: #ffffffe0;
   --nav-cta-glass-edge: #fffffffa;
@@ -68,6 +76,14 @@
   --contact-button-bg: #205cca;
   --contact-button-text: #ffffff;
   --contact-frame-shadow: #00000073;
+  --footer-surface: rgba(20, 28, 37, 0.9);
+  --footer-surface-edge: rgba(68, 87, 110, 0.6);
+  --footer-surface-bottom: rgba(9, 14, 20, 0.94);
+  --footer-text: #f3f7fb;
+  --footer-muted: #bcc7d2;
+  --footer-label: #d7e1ea;
+  --footer-border: rgba(139, 160, 186, 0.22);
+  --footer-shadow: rgba(0, 0, 0, 0.42);
   --nav-cta-glass-text: #121212;
   --nav-cta-glass-tint: #ffffffcc;
   --nav-cta-glass-edge: #fffffff5;
@@ -89,8 +105,10 @@ body,
   min-height: 100vh;
   width: 100%;
   /* Hide scrollbars but keep scroll functional */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE & Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE & Edge */
 }
 
 html::-webkit-scrollbar,
