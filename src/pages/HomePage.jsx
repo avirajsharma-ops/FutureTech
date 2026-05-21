@@ -2,6 +2,8 @@ import HeroScene, { SILVER_MODEL_LIGHTING_PROPS } from '../components/HeroScene'
 import FutureScrollReveal from '../components/FutureScrollReveal'
 import HomeJourney from '../components/HomeJourney'
 import HomeMagicSearch from '../components/HomeMagicSearch'
+import { AISection } from '../components/AISection'
+import { PrivacySection } from '../components/PrivacySection'
 
 export default function HomePage({ introStartRef }) {
   return (
@@ -12,6 +14,8 @@ export default function HomePage({ introStartRef }) {
         introStartRef={introStartRef}
         {...SILVER_MODEL_LIGHTING_PROPS}
       />
+      <AISection />
+      <PrivacySection />
       <FutureScrollReveal />
       <HomeJourney />
       <HomeMagicSearch />

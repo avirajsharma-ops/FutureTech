@@ -564,7 +564,7 @@ export default function HeroScene({
         {modelUrl && (
           <Canvas
             camera={{ fov: 10, position: [0, 0.95, 18] }}
-            dpr={deviceProfile.lowPower ? [1, 1] : [1, 1.5]}
+            dpr={deviceProfile.lowPower ? 1 : [1, 1.25]}
             frameloop={frameloop}
             gl={{
               antialias: false,
@@ -580,7 +580,7 @@ export default function HeroScene({
                 gl.toneMappingExposure = toneMappingExposure
               }
             }}
-            performance={{ min: 0.5 }}
+            performance={{ min: 0.35 }}
           >
             <ambientLight intensity={ambientLightIntensity} />
             <directionalLight
@@ -630,11 +630,8 @@ export default function HeroScene({
                 materialEmissive={materialEmissive}
                 materialEmissiveIntensity={materialEmissiveIntensity}
               />
-              {deviceProfile.lowPower ? (
-                <ProceduralEnv />
-              ) : (
-                <Environment preset="studio" />
-              )}
+              {deviceProfile.lowPower ? null : <Environment preset="studio" />}
+              {deviceProfile.lowPower && <ProceduralEnv />}
             </Suspense>
           </Canvas>
         )}

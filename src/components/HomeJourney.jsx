@@ -45,6 +45,8 @@ const LONG_TICK_LENGTH = 32
 const RAIL_VIEWBOX_WIDTH = 1200
 const RAIL_VIEWBOX_HEIGHT = 220
 const JOURNEY_ARC_STEP = 0.235
+const RAIL_PATH_SAMPLES = 96
+const SNAP_IDLE_MS = 160
 
 const clampProgress = (value) => Math.min(Math.max(value, 0), 1)
 
@@ -55,6 +57,16 @@ const getRailPoint = (ratio) => {
 
   return { coordinateX, coordinateY }
 }
+
+const RAIL_PATH_D = (() => {
+  const segments = []
+  for (let index = 0; index <= RAIL_PATH_SAMPLES; index += 1) {
+    const ratio = index / RAIL_PATH_SAMPLES
+    const { coordinateX, coordinateY } = getRailPoint(ratio)
+    segments.push(`${index === 0 ? 'M' : 'L'} ${coordinateX.toFixed(2)} ${coordinateY.toFixed(2)}`)
+  }
+  return segments.join(' ')
+})()
 
 const getRailTangent = (ratio) => {
   const clampedRatio = clampProgress(ratio)
@@ -148,6 +160,48 @@ export default function HomeJourney() {
   const activeIndex = Math.min(JOURNEY_MILESTONES.length - 1, Math.max(0, Math.round(trackPosition)))
   const beadPoint = getRailPoint(progress)
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+
+    let idleTimer = 0
+    let programmaticUntil = 0
+
+    const snapToNearest = () => {
+      const section = sectionRef.current
+      if (!section) return
+      if (performance.now() < programmaticUntil) return
+
+      const sectionTop = section.getBoundingClientRect().top + window.scrollY
+      const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1)
+      const relativeProgress = (window.scrollY - sectionTop) / scrollRange
+
+      if (relativeProgress <= 0.02 || relativeProgress >= 0.98) return
+
+      const steps = JOURNEY_MILESTONES.length - 1
+      const nearestIndex = Math.round(relativeProgress * steps)
+      const targetProgress = nearestIndex / steps
+      const targetScrollY = sectionTop + scrollRange * targetProgress
+
+      if (Math.abs(window.scrollY - targetScrollY) < 4) return
+
+      programmaticUntil = performance.now() + 900
+      window.scrollTo({ top: targetScrollY, behavior: 'smooth' })
+    }
+
+    const handleScroll = () => {
+      window.clearTimeout(idleTimer)
+      idleTimer = window.setTimeout(snapToNearest, SNAP_IDLE_MS)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      window.clearTimeout(idleTimer)
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
   const handleMilestoneSelect = (index) => {
     const section = sectionRef.current
     if (!section) return
@@ -171,9 +225,9 @@ export default function HomeJourney() {
         </div>
 
         <div className="home-journey__stage">
-          <svg className="home-journey__rail" viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden="true">
-            <path className="home-journey__rail-path home-journey__rail-path--ghost" d="M -80 184 C 250 86 660 72 1280 184" />
-            <path className="home-journey__rail-path" d="M -80 184 C 250 86 660 72 1280 184" />
+          <svg className="home-journey__rail" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <path className="home-journey__rail-path home-journey__rail-path--ghost" d={RAIL_PATH_D} />
+            <path className="home-journey__rail-path" d={RAIL_PATH_D} />
             <g className="home-journey__rail-ticks">
               {railTicks.map((tick, index) => (
                 <line
@@ -189,20 +243,26 @@ export default function HomeJourney() {
               {JOURNEY_MILESTONES.map((milestone, index) => {
                 const ratio = index / (JOURNEY_MILESTONES.length - 1)
                 const point = getRailPoint(ratio)
+                const isActive = index === activeIndex
 
                 return (
-                  <g
+                  <circle
                     key={milestone.phase}
-                    className={`home-journey__rail-checkpoint${index === activeIndex ? ' is-active' : ''}`}
-                    transform={`translate(${point.coordinateX} ${point.coordinateY}) rotate(${getRailAngle(ratio)})`}
-                  >
-                    <path d="M -11 -8 L 2 0 L -11 8" />
-                  </g>
+                    className={`home-journey__rail-checkpoint${isActive ? ' is-active' : ''}`}
+                    cx={point.coordinateX}
+                    cy={point.coordinateY}
+                    r={isActive ? 7 : 5}
+                  />
                 )
               })}
             </g>
-            <g className="home-journey__rail-bead" transform={`translate(${beadPoint.coordinateX} ${beadPoint.coordinateY}) rotate(${getRailAngle(progress)})`}>
-              <path d="M -14 -10 L 4 0 L -14 10" />
+            <g
+              className="home-journey__rail-bead"
+              style={{
+                transform: `translate(${beadPoint.coordinateX}px, ${beadPoint.coordinateY}px) rotate(${getRailAngle(progress)}deg)`,
+              }}
+            >
+              <path d="M -10 -8 L 6 0 L -10 8 Z" />
             </g>
           </svg>
 
@@ -212,7 +272,6 @@ export default function HomeJourney() {
               const distance = Math.abs(offset)
               const isActive = index === activeIndex
               const arcPoint = getJourneyTextPoint(0.5 + offset * JOURNEY_ARC_STEP)
-              const rotation = offset * 8.5
               const scale = Math.max(0.64, 1 - distance * 0.13)
               const opacity = Math.max(0.16, 1 - distance * 0.44)
 
@@ -232,7 +291,7 @@ export default function HomeJourney() {
                     zIndex: Math.round(20 - distance * 4),
                     pointerEvents: distance > 2.2 ? 'none' : 'auto',
                     opacity,
-                    transform: `translate3d(-50%, calc(-100% - var(--journey-text-lift)), 0) rotate(${rotation}deg) scale(${scale})`,
+                    transform: `translate3d(-50%, calc(-100% - var(--journey-text-lift)), 0) scale(${scale})`,
                   }}
                 >
                   <span className="home-journey__icon" aria-hidden="true">{milestone.icon}</span>

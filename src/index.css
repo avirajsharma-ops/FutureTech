@@ -5,6 +5,16 @@
   --muted: #3a3a3a;
   --border: #14141426;
   --hero-glow: #e7e3d6;
+  --hero-bg: #fdfcf8;
+  --hero-overlay-strong: #fdfcf8;
+  --hero-overlay-medium: #fdfcf8b8;
+  --hero-overlay-mobile-medium: #fdfcf8c2;
+  --hero-overlay-small-medium: #fdfcf8cc;
+  --hero-overlay-clear: #fdfcf800;
+  --hero-graffiti-mask-strong: #000000;
+  --hero-graffiti-mask-medium: #000000b8;
+  --hero-graffiti-mask-soft: #00000026;
+  --hero-graffiti-mask-clear: #00000000;
   --director-accent: #c4a17b;
   --director-accent-strong: #b58c60;
   --director-ghost: #ece7df;
@@ -28,9 +38,9 @@
   --contact-button-bg: #205cca;
   --contact-button-text: #ffffff;
   --contact-frame-shadow: #6070831c;
-  --footer-surface: #f0f8ff;
-  --footer-surface-edge: #f0f8ff;
-  --footer-surface-bottom: #f0f8ff;
+  --footer-surface: #fdfcf7;
+  --footer-surface-edge: #f5f1e6;
+  --footer-surface-bottom: #f3eedf;
   --footer-text: #000000;
   --footer-muted: #000000;
   --footer-label: #000000;
@@ -53,6 +63,16 @@
   --muted: #bbbbbb;
   --border: #ffffff2b;
   --hero-glow: #1a1a1a;
+  --hero-bg: #050505;
+  --hero-overlay-strong: #050505;
+  --hero-overlay-medium: #050505b8;
+  --hero-overlay-mobile-medium: #050505c2;
+  --hero-overlay-small-medium: #050505cc;
+  --hero-overlay-clear: #05050500;
+  --hero-graffiti-mask-strong: #000000;
+  --hero-graffiti-mask-medium: #000000b8;
+  --hero-graffiti-mask-soft: #00000026;
+  --hero-graffiti-mask-clear: #00000000;
   --director-accent: #d9b48b;
   --director-accent-strong: #e3c49e;
   --director-ghost: #15110d;
@@ -94,8 +114,16 @@
   color-scheme: dark;
 }
 
+@tailwind utilities;
+
 * {
   box-sizing: border-box;
+}
+
+html {
+  /* Zoom-compensation: --font-size is set on <html> by useDesktopScaleCompensation
+     so the rendered layout stays at its design pixel size at any browser zoom level. */
+  font-size: var(--font-size, 100%);
 }
 
 html,

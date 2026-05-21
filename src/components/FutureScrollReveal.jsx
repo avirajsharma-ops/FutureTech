@@ -42,7 +42,11 @@ function usePinnedScrollProgress(sectionRef) {
 
       const sectionTop = section.getBoundingClientRect().top + window.scrollY
       const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1)
-      setProgress(clampProgress((window.scrollY - sectionTop) / scrollRange))
+      const rawProgress = clampProgress((window.scrollY - sectionTop) / scrollRange)
+      // Compress all animation work into the first 78% of scroll; the
+      // remaining 22% acts as a "hold" zone so the final composition
+      // stays visible before the page scrolls past the section.
+      setProgress(clampProgress(rawProgress / 0.78))
     }
 
     const scheduleUpdate = () => {

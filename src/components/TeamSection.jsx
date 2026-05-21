@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { TEAM } from '../data/team.js'
 import './TeamSection.css'
 
 /**
@@ -11,41 +12,6 @@ import './TeamSection.css'
  * a fullscreen profile modal that scales open from the card's center.
  */
 
-const TEAM = [
-  {
-    name: 'Aadil Khan',
-    role: 'Fullstack Developer',
-    quote: '"Code with clarity, ship with intent."',
-    img: '/team/Aadil Khan - Fullstack Developer.jpg',
-    bio: 'Aadil bridges the front and back ends — turning Figma flows into shipping product and wiring up the APIs that power them. He cares about clean state, fast pages, and making the boring parts disappear.',
-    skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
-  },
-  {
-    name: 'Lokesh Dhote',
-    role: 'Fullstack Developer',
-    quote: '"Simple systems scale the furthest."',
-    img: '/team/Lokesh Dhote - Fullstack Developer.jpg',
-    bio: 'Lokesh ships across the stack with a bias toward simplicity. He sweats build pipelines, keeps the bundle lean, and obsesses over the moments where UX and infra meet.',
-    skills: ['Next.js', 'GraphQL', 'AWS', 'Postgres'],
-  },
-  {
-    name: 'Sahil Sahu',
-    role: 'UX / UI Designer',
-    quote: '"Design should feel inevitable."',
-    img: '/team/Sahil Sahu - UX UI Designer.jpg',
-    bio: 'Sahil designs interfaces that feel inevitable — warm, modern, and effortless to use. He works in tight loops with engineering so the pixels we ship match the pixels we drew.',
-    skills: ['Figma', 'Design systems', 'Motion', 'Prototyping'],
-  },
-  {
-    name: 'Kushagra Pandey',
-    role: 'Cyber Security Specialist',
-    quote: '"Trust is built before launch."',
-    img: '/team/Kushagra Pandey - Cyber Security Specialist.jpg',
-    bio: 'Kushagra hardens everything we build — auth flows, infra, third-party integrations, the works. He treats security as a feature, not a checkbox, and audits each release before it lands.',
-    skills: ['AppSec', 'Pen testing', 'Cloud security', 'Threat modeling'],
-  },
-]
-
 const VISIBLE_COUNT = 4
 const CYCLE_MS = 3200
 
@@ -55,6 +21,27 @@ export default function TeamSection() {
   const [activeIdx, setActiveIdx] = useState(null)
   const [modalOrigin, setModalOrigin] = useState(null)
   const timerRef = useRef(null)
+  const hoverLeaveTimerRef = useRef(null)
+
+  const handleStackEnter = () => {
+    if (hoverLeaveTimerRef.current) {
+      clearTimeout(hoverLeaveTimerRef.current)
+      hoverLeaveTimerRef.current = null
+    }
+    setHovered(true)
+  }
+
+  const handleStackLeave = () => {
+    if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current)
+    hoverLeaveTimerRef.current = setTimeout(() => {
+      setHovered(false)
+      hoverLeaveTimerRef.current = null
+    }, 2000)
+  }
+
+  useEffect(() => () => {
+    if (hoverLeaveTimerRef.current) clearTimeout(hoverLeaveTimerRef.current)
+  }, [])
 
   const isPaused = hovered || activeIdx !== null
 
@@ -78,6 +65,14 @@ export default function TeamSection() {
     if (activeIdx === null) return
     const onKey = (e) => {
       if (e.key === 'Escape') setActiveIdx(null)
+      if (e.key === 'ArrowLeft') {
+        setModalOrigin(null)
+        setActiveIdx((idx) => (idx === null ? idx : (idx - 1 + TEAM.length) % TEAM.length))
+      }
+      if (e.key === 'ArrowRight') {
+        setModalOrigin(null)
+        setActiveIdx((idx) => (idx === null ? idx : (idx + 1) % TEAM.length))
+      }
     }
     window.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
@@ -90,7 +85,7 @@ export default function TeamSection() {
   const activeMember = activeIdx !== null ? TEAM[activeIdx] : null
   const viewportWidth = typeof window === 'undefined' ? 1280 : window.innerWidth
   const viewportHeight = typeof window === 'undefined' ? 720 : window.innerHeight
-  const modalTargetWidth = Math.min(560, Math.max(viewportWidth - 32, 280))
+  const modalTargetWidth = Math.min(1040, Math.max(viewportWidth - 32, 320))
   const modalInitial = modalOrigin
     ? {
         opacity: 0,
@@ -111,6 +106,19 @@ export default function TeamSection() {
     setActiveIdx(idx)
   }
 
+  const moveProfile = (direction) => {
+    setModalOrigin(null)
+    setActiveIdx((idx) => (idx === null ? idx : (idx + direction + TEAM.length) % TEAM.length))
+  }
+
+  const getModalSlideOffset = (idx) => {
+    if (activeIdx === null) return 0
+    let distance = idx - activeIdx
+    if (distance > TEAM.length / 2) distance -= TEAM.length
+    if (distance < -TEAM.length / 2) distance += TEAM.length
+    return distance
+  }
+
   return (
     <section className="team-section">
       <div className="team-section__head">
@@ -125,8 +133,8 @@ export default function TeamSection() {
       <div className="team-stack-wrap">
         <ul
           className={`team-stack${hovered ? ' is-hovered' : ''}`}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+          onMouseEnter={handleStackEnter}
+          onMouseLeave={handleStackLeave}
           aria-label="Team members"
         >
           {TEAM.map((m, idx) => {
@@ -174,7 +182,7 @@ export default function TeamSection() {
             onClick={() => setActiveIdx(null)}
           >
             <motion.div
-              className="team-modal"
+              className="team-modal__slider-shell"
               initial={modalInitial}
               animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
               exit={modalInitial}
@@ -192,26 +200,125 @@ export default function TeamSection() {
               >
                 ×
               </button>
-              <img
-                src={activeMember.img}
-                alt={activeMember.name}
-                className="team-modal__avatar"
-              />
-              <div className="team-modal__content">
-                <h3>{activeMember.name}</h3>
-                <p className="team-modal__quote">{activeMember.quote}</p>
-                <p className="team-modal__role">{activeMember.role}</p>
+              <button
+                type="button"
+                className="team-modal__nav team-modal__nav--prev"
+                onClick={() => moveProfile(-1)}
+                aria-label="Show previous team member"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15 5 8 12l7 7" />
+                </svg>
+              </button>
+              <div className="team-modal__slider" aria-live="polite">
+                {TEAM.map((member, idx) => {
+                  const slideOffset = getModalSlideOffset(idx)
+                  const isActive = idx === activeIdx
+                  return (
+                    <article
+                      key={member.name}
+                      className={`team-modal${isActive ? ' is-active' : ''}`}
+                      style={{
+                        '--slide-offset': slideOffset,
+                        '--slide-distance': Math.abs(slideOffset),
+                        '--slide-z': TEAM.length - Math.abs(slideOffset),
+                      }}
+                      aria-hidden={!isActive}
+                      onClick={() => {
+                        if (!isActive) {
+                          setModalOrigin(null)
+                          setActiveIdx(idx)
+                        }
+                      }}
+                    >
+                      <div className="team-modal__inner">
+                        <img
+                          className="team-modal__cover"
+                          src={member.img}
+                          alt={member.name}
+                        />
+                        <div className="team-modal__body">
+                          <h2 className="team-modal__header">
+                            <span className="team-modal__chips">
+                              {member.name}
+                              <svg className="team-modal__icon" aria-hidden="true">
+                                <use xlinkHref="#team-icon-check" />
+                              </svg>
+                            </span>
+                          </h2>
+                          <p className="team-modal__role-line">{member.role}</p>
+                          <div className="team-modal__details">
+                          <p className="team-modal__tagline">{member.quote}</p>
+                          <p className="team-modal__bio">{member.bio}</p>
+                          <p className="team-modal__meta">
+                            <span className="team-modal__chips">
+                              <svg className="team-modal__icon" aria-hidden="true">
+                                <use xlinkHref="#team-icon-user" />
+                              </svg>
+                              {member.role}
+                            </span>
+                            <span className="team-modal__chips">
+                              <svg className="team-modal__icon" aria-hidden="true">
+                                <use xlinkHref="#team-icon-cards" />
+                              </svg>
+                              {member.skills.length}
+                            </span>
+                            <button
+                              type="button"
+                              className="team-modal__button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActiveIdx(null)
+                              }}
+                              tabIndex={isActive ? 0 : -1}
+                            >
+                              Connect
+                              <svg className="team-modal__icon" aria-hidden="true">
+                                <use xlinkHref="#team-icon-plus" />
+                              </svg>
+                            </button>
+                          </p>
+                          <ul className="team-modal__skills">
+                            {member.skills.map((s) => (
+                              <li key={s}>{s}</li>
+                            ))}
+                          </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
               </div>
-              <p className="team-modal__bio">{activeMember.bio}</p>
-              <ul className="team-modal__skills">
-                {activeMember.skills.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
+              <button
+                type="button"
+                className="team-modal__nav team-modal__nav--next"
+                onClick={() => moveProfile(1)}
+                aria-label="Show next team member"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 5 7 7-7 7" />
+                </svg>
+              </button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
+        <symbol id="team-icon-plus" viewBox="0 -960 960 960">
+          <path fill="currentColor" d="M453-140v-313H140v-54h313v-313h54v313h313v54H507v313h-54Z" />
+        </symbol>
+        <symbol id="team-icon-user" viewBox="0 -960 960 960">
+          <path fill="currentColor" d="M480-524q-54.55 0-92.27-37.72Q350-599.45 350-654q0-54.55 37.73-92.28Q425.45-784 480-784t92.28 37.72Q610-708.55 610-654q0 54.55-37.72 92.28Q534.55-524 480-524ZM182-171v-83q0-29 15.69-52.85Q213.38-330.71 240-344q59-29 119.41-43.5t120.5-14.5q60.09 0 120.59 14.5T720-344q26.63 13.29 42.31 37.15Q778-283 778-254v83H182Zm54-54h488v-29q0-14-7.5-24.5T695-296q-49-23-105.19-37.5Q533.63-348 480-348t-109.81 14Q314-320 265-296q-14 6-21.5 17t-7.5 25v29Zm244-353q32 0 54-22t22-54q0-32-22-54t-54-22q-32 0-54 22t-22 54q0 32 22 54t54 22Zm0-76Zm0 429Z" />
+        </symbol>
+        <symbol id="team-icon-cards" viewBox="0 -960 960 960">
+          <path fill="currentColor" d="m493-469 87-52 87 52-24-98 77-67-101-9-39-92-39 92-101 9 77 67-24 98Zm129 257h118q9 18-10.5 28.5T691-170l-447 58q-36 3-63.4-18.65Q153.19-152.3 149-188l-49-382q-4-36 18.35-64.86Q140.7-663.71 177-667l33-1v54l-28 1q-14 1-22 11.5t-6 24.5l48 383q2 14 12 22t24 6l384-46Zm-246-80q-36.73 0-61.36-24.64Q290-341.27 290-378v-408q0-36.72 24.64-61.36Q339.27-872 376-872h408q36.72 0 61.36 24.64T870-786v408q0 36.73-24.64 61.36Q820.72-292 784-292H376Zm0-54h408q14 0 23-9t9-23v-408q0-14-9-23t-23-9H376q-14 0-23 9t-9 23v408q0 14 9 23t23 9Zm204-236ZM196-162Z" />
+        </symbol>
+        <symbol id="team-icon-check" viewBox="0 -960 960 960">
+          <path fill="currentColor" d="m443-429 169-169-38-39-131 132-57-56-38 38 95 94ZM222-160v-578q0-36.72 24.64-61.36Q271.27-824 308-824h344q36.72 0 61.36 24.64T738-738v578L480-270 222-160Zm54-82 204-87.66L684-242v-496q0-12-10-22t-22-10H308q-12 0-22 10t-10 22v496Zm0-528h408-408Z" />
+        </symbol>
+      </svg>
     </section>
   )
 }

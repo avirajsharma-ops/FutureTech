@@ -9,7 +9,7 @@
   --future-reveal-line: color-mix(in srgb, var(--text) 14%, transparent);
   position: relative;
   z-index: 2;
-  height: 380vh;
+  height: 460vh;
   padding: 0 32px;
   background: var(--future-reveal-bg);
   color: var(--future-reveal-text);
@@ -45,7 +45,7 @@
   background:
     radial-gradient(circle at 50% 52%, color-mix(in srgb, white 72%, transparent), transparent 48%),
     var(--future-reveal-panel);
-  clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px), 0 18px);
+  border-radius: clamp(20px, 2.4vw, 32px);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--future-reveal-text) 9%, transparent);
   will-change: opacity;
 }
@@ -115,68 +115,82 @@
 }
 
 .future-meta-card.is-back {
-  opacity: 0.74;
+  opacity: 0.96;
   transform-origin: center;
 }
 
 .future-meta-card.is-deep {
-  opacity: 0.58;
+  opacity: 0.92;
 }
 
 .future-transaction-pill.is-front {
-  box-shadow: 0 18px 46px color-mix(in srgb, var(--future-reveal-text) 10%, transparent);
+  box-shadow: 0 22px 52px color-mix(in srgb, var(--future-reveal-text) 12%, transparent);
 }
 
 .future-meta-card span,
 .future-grid-note span {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 10px;
-  color: color-mix(in srgb, var(--future-reveal-accent) 86%, transparent);
-  font-size: 0.66rem;
+  color: color-mix(in srgb, var(--future-reveal-accent) 92%, transparent);
+  font-size: 0.64rem;
   font-weight: 900;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
 }
 
 .future-meta-card span::before,
 .future-grid-note span::before {
-  content: '▸';
-  margin-right: 8px;
-  color: var(--future-reveal-accent-strong);
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--future-reveal-accent-strong);
+  flex: 0 0 auto;
 }
 
 .future-meta-card b,
 .future-grid-note b {
   display: block;
-  color: inherit;
-  font-size: 0.68rem;
+  color: var(--future-reveal-panel-text);
+  font-size: 0.7rem;
   font-weight: 900;
-  line-height: 1.42;
-  letter-spacing: 0.12em;
+  line-height: 1.44;
+  letter-spacing: 0.1em;
 }
 
+/* Orbital layout: cards arranged in a clock pattern around a central
+   headline exclusion zone (~horizontal 22–78%, vertical 34–66%). */
+
 .future-meta-card--top {
-  left: 34%;
+  /* 11 o'clock — upper-left inner orbit */
+  left: 12%;
   top: 13%;
 }
 
 .future-meta-card--left {
-  left: 21%;
-  top: 27%;
+  /* 10 o'clock — left-of-headline */
+  left: 3.5%;
+  top: 30%;
 }
 
 .future-meta-card--right {
-  right: 17%;
-  top: 27%;
+  /* 2 o'clock — right-of-headline */
+  right: 3.5%;
+  top: 30%;
 }
 
 .future-meta-card--bottom-left {
-  left: 17%;
-  bottom: 18%;
+  /* 8 o'clock */
+  left: 12%;
+  bottom: 12%;
 }
 
 .future-meta-card--bottom-right {
-  right: 9%;
-  bottom: 27%;
+  /* 4 o'clock */
+  right: 12%;
+  bottom: 12%;
 }
 
 .future-transaction-pill {
@@ -231,26 +245,30 @@
 }
 
 .future-transaction-pill--left {
-  left: 15%;
-  top: 57%;
+  /* 7 o'clock — lower-left inner orbit */
+  left: 4%;
+  bottom: 30%;
 }
 
 .future-transaction-pill--top {
-  left: 54%;
-  top: 14%;
+  /* 1 o'clock — upper-right inner orbit */
+  right: 12%;
+  top: 13%;
 }
 
 .future-transaction-pill--right {
-  right: 20.5%;
-  bottom: 14%;
+  /* 5 o'clock — lower-right inner orbit */
+  right: 4%;
+  bottom: 30%;
 }
 
 .future-alert-card {
-  right: 15%;
-  top: 47%;
-  width: min(300px, 23vw);
-  padding: 14px 16px;
-  border-radius: 7px;
+  /* 3 o'clock outer edge — sits above bottom-right meta */
+  right: 3.5%;
+  top: 49%;
+  width: min(290px, 22vw);
+  padding: 16px 18px;
+  border-radius: 8px;
 }
 
 .future-alert-card span,
@@ -281,11 +299,12 @@
 }
 
 .future-mini-chart-card {
-  left: 18%;
-  top: 42%;
-  width: min(260px, 21vw);
-  padding: 14px 14px 12px;
-  border-radius: 7px;
+  /* 9 o'clock outer edge — mirrors alert on the left */
+  left: 3.5%;
+  top: 49%;
+  width: min(250px, 20vw);
+  padding: 16px 16px 14px;
+  border-radius: 8px;
 }
 
 .future-mini-chart-card div {
@@ -314,12 +333,14 @@
 .future-mini-chart-card i:nth-child(10) { height: 32px; }
 
 .future-meta-card--product {
+  /* 6 o'clock — bottom-center anchor */
   left: 50%;
   margin-left: max(-150px, -11vw);
   right: auto;
   top: auto;
-  bottom: 5%;
+  bottom: 4%;
   width: min(300px, 23vw);
+  text-align: left;
 }
 
 .future-code-card,
@@ -334,10 +355,10 @@
 
 .future-code-card {
   position: absolute;
-  left: clamp(28px, 4.6vw, 78px);
-  top: clamp(42px, 6.5vh, 72px);
-  width: min(390px, 33vw);
-  height: 270px;
+  left: clamp(28px, 4vw, 72px);
+  top: clamp(48px, 7vh, 88px);
+  width: min(400px, 32vw);
+  height: min(290px, 38vh);
   overflow: hidden;
   font-family: 'SFMono-Regular', Consolas, monospace;
   will-change: transform, opacity;
@@ -393,11 +414,12 @@
 
 .future-api-stack {
   position: absolute;
-  left: clamp(28px, 4.6vw, 78px);
-  top: 60vh;
+  left: clamp(28px, 4vw, 72px);
+  top: auto;
+  bottom: clamp(48px, 7vh, 88px);
   display: grid;
-  gap: 36px;
-  width: min(386px, 34vw);
+  gap: 16px;
+  width: min(400px, 32vw);
   will-change: transform, opacity;
 }
 
@@ -472,8 +494,10 @@
 
 .future-grid-note {
   position: absolute;
-  min-width: 265px;
-  padding: 22px 24px;
+  right: clamp(28px, 4vw, 72px);
+  width: min(280px, 24vw);
+  min-width: 240px;
+  padding: 20px 22px;
   font-family: 'SFMono-Regular', Consolas, monospace;
   overflow: visible;
   will-change: opacity, transform;
@@ -488,29 +512,33 @@
 }
 
 .future-grid-note--merchant {
-  right: 18%;
-  top: 18%;
+  right: clamp(28px, 4vw, 72px);
+  top: clamp(48px, 8vh, 96px);
 }
 
 .future-grid-note--location {
-  right: 10%;
-  top: 32%;
+  right: clamp(28px, 4vw, 72px);
+  top: 36vh;
 }
 
 .future-grid-note--category {
-  right: 14%;
-  bottom: 14%;
+  right: clamp(28px, 4vw, 72px);
+  top: auto;
+  bottom: clamp(48px, 8vh, 96px);
 }
 
 .future-device-card {
   position: absolute;
   left: 50%;
-  top: 64vh;
-  width: min(330px, 28vw);
-  min-height: 360px;
-  padding: 46px 14px 18px;
+  top: auto;
+  bottom: clamp(24px, 4vh, 56px);
+  width: min(320px, 26vw);
+  min-height: 280px;
+  max-height: 46vh;
+  padding: 38px 14px 18px;
   border-color: color-mix(in srgb, var(--future-reveal-text) 16%, transparent);
-  border-radius: 34px 34px 0 0;
+  border-radius: 28px 28px 0 0;
+  overflow: hidden;
   will-change: transform, opacity;
 }
 
@@ -637,6 +665,19 @@
   will-change: transform, opacity;
 }
 
+.future-reveal-copy--first::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(900px, 70vw);
+  height: min(560px, 58vh);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--future-reveal-bg) 92%, transparent) 0%, color-mix(in srgb, var(--future-reveal-bg) 70%, transparent) 38%, transparent 72%);
+  pointer-events: none;
+  z-index: -1;
+}
+
 .future-reveal-copy p {
   margin: 0;
   font-size: clamp(2.9rem, 3.35vw, 4rem);
@@ -662,9 +703,34 @@
   z-index: 4;
 }
 
+.future-reveal-copy--second::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(960px, 72vw);
+  height: min(420px, 48vh);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--future-reveal-bg) 88%, transparent) 0%, color-mix(in srgb, var(--future-reveal-bg) 64%, transparent) 42%, transparent 74%);
+  pointer-events: none;
+  z-index: -1;
+}
+
 .future-reveal-copy--second p {
   max-width: 850px;
   color: var(--future-reveal-text);
+}
+
+@media (max-width: 1280px) {
+  .future-meta-card { min-width: 180px; padding: 14px 16px; }
+  .future-transaction-pill { width: min(320px, 28vw); }
+  .future-alert-card { width: min(250px, 22vw); }
+  .future-mini-chart-card { width: min(220px, 20vw); }
+
+  .future-meta-card--top { left: 8%; top: 11%; }
+  .future-meta-card--bottom-left { left: 8%; bottom: 11%; }
+  .future-meta-card--bottom-right { right: 8%; bottom: 11%; }
+  .future-transaction-pill--top { right: 8%; top: 11%; }
 }
 
 @media (max-width: 960px) {
@@ -685,19 +751,23 @@
     width: min(280px, 34vw);
   }
 
+  /* On tablet, keep only 6 cards in a balanced 3+3 ring */
+  .future-meta-card--left,
   .future-meta-card--right,
-  .future-meta-card--bottom-right,
-  .future-transaction-pill--right,
   .future-alert-card,
-  .future-meta-card--product,
+  .future-mini-chart-card,
   .future-grid-note--location,
   .future-grid-note--category {
     display: none;
   }
 
-  .future-mini-chart-card {
-    width: min(240px, 34vw);
-  }
+  .future-meta-card--top { left: 6%; top: 8%; }
+  .future-transaction-pill--top { right: 6%; top: 8%; }
+  .future-transaction-pill--left { left: 6%; bottom: 32%; }
+  .future-transaction-pill--right { right: 6%; bottom: 32%; }
+  .future-meta-card--bottom-left { left: 6%; bottom: 10%; }
+  .future-meta-card--bottom-right { right: 6%; bottom: 10%; }
+  .future-meta-card--product { bottom: 2%; }
 
   .future-transaction-pill {
     width: min(330px, 44vw);

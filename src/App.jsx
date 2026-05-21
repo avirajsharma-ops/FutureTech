@@ -16,6 +16,7 @@ import { HERO_MODEL_URL } from './lib/heroModel'
 import { COIN_MODEL_URL } from './lib/coinModel'
 import { WORK_MODEL_URL } from './lib/workModel'
 import { SERVICES_MODEL_URL } from './lib/servicesModel'
+import { useDesktopScaleCompensation } from './hooks/useDesktopScaleCompensation'
 import './styles/liquid-glass.css'
 import './App.css'
 
@@ -44,6 +45,7 @@ function getModelIntroPath(pathname) {
 }
 
 export default function App() {
+  useDesktopScaleCompensation()
   const [theme] = useState('light')
   const introStartRefs = useRef(
     Object.fromEntries([...MODEL_INTRO_PATHS].map((path) => [path, { current: null }])),
