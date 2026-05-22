@@ -1,4 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&display=swap');
+
 :root {
+  --site-font-family: 'Raleway', sans-serif;
   --bg: #fdfcf7;
   --surface: #ffffffcc;
   --text: #0a0a0a;
@@ -116,14 +119,18 @@
 
 @tailwind utilities;
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 html {
   /* Zoom-compensation: --font-size is set on <html> by useDesktopScaleCompensation
      so the rendered layout stays at its design pixel size at any browser zoom level. */
   font-size: var(--font-size, 100%);
+  font-family: var(--site-font-family);
 }
 
 html,
@@ -156,7 +163,7 @@ body::-webkit-scrollbar,
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--site-font-family);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

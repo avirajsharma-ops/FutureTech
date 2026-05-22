@@ -87,7 +87,7 @@
 }
 
 .expertise-showcase__title em {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: inherit;
     font-style: italic;
     font-weight: 400;
 }
@@ -405,7 +405,7 @@
     align-items: center;
     justify-content: space-between;
     color: var(--expertise-card-muted);
-    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-family: inherit;
     font-size: clamp(0.7rem, 0.8vw, 0.82rem);
     font-weight: 900;
     letter-spacing: 0.16em;

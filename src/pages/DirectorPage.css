@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap');
-
 .director-page {
   --director-page-bg: color-mix(in srgb, var(--bg) 94%, var(--director-accent) 6%);
 
@@ -8,7 +6,6 @@
   overflow-x: clip;
   overflow-y: visible;
   padding-top: 0;
-  font-family: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
   background: var(--director-page-bg);
 }
 
@@ -71,7 +68,7 @@ body:has(.director-page) .site-footer {
 .director-hero__about-title,
 .director-overview__ghost,
 .director-story__statement {
-  font-family: 'Montserrat', 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: inherit;
 }
 
 .director-hero__name {

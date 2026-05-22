@@ -91,7 +91,7 @@
   border: 1px solid color-mix(in srgb, var(--future-reveal-text) 18%, transparent);
   background: color-mix(in srgb, #FDFCF8 76%, white 24%);
   box-shadow: 0 14px 38px color-mix(in srgb, var(--future-reveal-text) 7%, transparent);
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   transform-style: preserve-3d;
   will-change: transform, opacity, filter;
 }
@@ -102,7 +102,7 @@
   border: 1px solid color-mix(in srgb, var(--future-reveal-text) 18%, transparent);
   background: color-mix(in srgb, #FDFCF8 76%, white 24%);
   box-shadow: 0 14px 38px color-mix(in srgb, var(--future-reveal-text) 7%, transparent);
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   transform-style: preserve-3d;
   will-change: transform, opacity, filter;
 }
@@ -360,7 +360,7 @@
   width: min(400px, 32vw);
   height: min(290px, 38vh);
   overflow: hidden;
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   will-change: transform, opacity;
 }
 
@@ -433,7 +433,7 @@
 .future-api-card span,
 .future-latency-card span,
 .future-latency-card b {
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   color: var(--future-reveal-muted);
   font-size: 0.7rem;
   font-weight: 900;
@@ -448,7 +448,7 @@
   border: 1px solid color-mix(in srgb, var(--future-reveal-text) 16%, transparent);
   border-radius: 6px;
   color: var(--future-reveal-text);
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   font-size: 0.68rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -498,7 +498,7 @@
   width: min(280px, 24vw);
   min-width: 240px;
   padding: 20px 22px;
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   overflow: visible;
   will-change: opacity, transform;
 }
@@ -562,7 +562,7 @@
   border-radius: 5px;
   background: var(--future-reveal-panel-text);
   color: var(--future-reveal-panel);
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -570,7 +570,7 @@
 .future-device-card__screen b,
 .future-device-card__screen small {
   display: block;
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
 }
 
 .future-device-card__screen b {
@@ -585,7 +585,7 @@
 
 .future-device-card__screen strong {
   align-self: end;
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -626,7 +626,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px 14px;
   padding: 14px 16px 0;
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: inherit;
   font-size: 0.62rem;
 }
 

@@ -76,7 +76,7 @@
   display: flex;
   align-items: center;
   z-index: 3;
-  font-family: 'JetBrains Mono', 'Menlo', 'Courier New', monospace;
+  font-family: inherit;
 }
 
 /* Bracket card — outline rectangle with corner brackets */
@@ -232,7 +232,7 @@
 .ds-json__body {
   margin: 0;
   padding: 14px 16px;
-  font-family: 'JetBrains Mono', 'Menlo', monospace;
+  font-family: inherit;
   font-size: 0.66rem;
   line-height: 1.55;
   color: #2a3a30;
@@ -251,7 +251,7 @@
 }
 
 .ds-api__token {
-  font-family: 'JetBrains Mono', 'Menlo', monospace;
+  font-family: inherit;
   font-size: 0.7rem;
   color: #0a0a0a;
   word-break: break-all;

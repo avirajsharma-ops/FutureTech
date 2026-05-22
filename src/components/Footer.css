@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&display=swap');
-
 .site-footer {
     width: 100%;
     padding: clamp(1rem, 2vw, 1.5rem) clamp(0.75rem, 1.6vw, 1.25rem) clamp(0.75rem, 1.6vw, 1.25rem);
@@ -24,7 +22,7 @@
     background: var(--footer-surface);
     box-shadow: none;
     color: var(--footer-text);
-    font-family: 'Montserrat', 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+    font-family: inherit;
 }
 
 .site-footer__inner.liquid-glass::before,
