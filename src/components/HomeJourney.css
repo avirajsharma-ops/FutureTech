@@ -1,6 +1,7 @@
 .home-journey {
   --journey-card-width: clamp(15rem, 23vw, 19rem);
   --journey-text-lift: clamp(5.75rem, 8vw, 7.25rem);
+  --journey-map-fade-height: clamp(8rem, 14vw, 14rem);
   position: relative;
   z-index: 2;
   height: 300vh;
@@ -8,7 +9,25 @@
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  overflow: clip visible;
+  overflow-x: clip;
+  overflow-y: clip;
+}
+
+.home-journey::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 100vw;
+  height: var(--journey-map-fade-height);
+  transform: translateX(-50%);
+  z-index: 30;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 95% at 50% 100%, var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 46%, color-mix(in srgb, var(--bg) 38%, transparent) 72%, transparent 100%),
+    radial-gradient(ellipse 42% 86% at 0% 100%, var(--bg) 0%, color-mix(in srgb, var(--bg) 76%, transparent) 50%, transparent 100%),
+    radial-gradient(ellipse 42% 86% at 100% 100%, var(--bg) 0%, color-mix(in srgb, var(--bg) 76%, transparent) 50%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--bg) 20%, transparent) 52%, var(--bg) 92%, var(--bg) 100%);
 }
 
 .home-journey * {
@@ -23,7 +42,7 @@
   align-items: center;
   min-height: 100vh;
   padding: clamp(5.5rem, 10vh, 8rem) 0 clamp(3rem, 7vh, 5rem);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .home-journey__header {
@@ -61,11 +80,73 @@
 .home-journey__stage {
   --journey-rail-bottom: clamp(3rem, 7vh, 5.75rem);
   --journey-rail-width: 112vw;
-  --journey-rail-height: clamp(9rem, 18vw, 15rem);
+  --journey-rail-rendered-height: 20.54vw;
+  --journey-rail-apex-offset: 8.59vw;
+  --journey-globe-diameter: 410vw;
+  --journey-globe-radius: calc(var(--journey-globe-diameter) / 2);
+  --journey-globe-curve-gap: 1em;
+  --journey-globe-visible-depth: clamp(46rem, 92vw, 100rem);
+  --journey-globe-fade-height: clamp(34rem, 68vw, 74rem);
+  --journey-globe-map-offset: 0rem;
   position: relative;
+  isolation: isolate;
   width: 100vw;
   min-height: clamp(32rem, 58vh, 42rem);
   margin: clamp(2rem, 5vh, 4rem) auto 0;
+}
+
+.home-journey__globe {
+  position: absolute;
+  left: 50%;
+  top: calc(100% - var(--journey-rail-bottom) - var(--journey-rail-rendered-height) + var(--journey-rail-apex-offset) + var(--journey-globe-curve-gap));
+  width: var(--journey-globe-diameter);
+  height: var(--journey-globe-visible-depth);
+  transform: translateX(-50%);
+  z-index: 1;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  filter: drop-shadow(0 24px 68px rgba(35, 104, 232, 0.1));
+  -webkit-clip-path: ellipse(var(--journey-globe-radius) var(--journey-globe-radius) at 50% var(--journey-globe-radius));
+  clip-path: ellipse(var(--journey-globe-radius) var(--journey-globe-radius) at 50% var(--journey-globe-radius));
+}
+
+.home-journey__globe::before,
+.home-journey__globe::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--journey-globe-diameter);
+  height: var(--journey-globe-diameter);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.home-journey__globe::before {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.98) 0%, rgba(249, 252, 255, 0.88) 11%, rgba(234, 244, 255, 0.54) 30%, rgba(255, 255, 255, 0.06) 58%, transparent 76%);
+}
+
+.home-journey__globe::after {
+  z-index: 2;
+  background: linear-gradient(to bottom, transparent 0%, transparent 38%, color-mix(in srgb, var(--bg) 24%, transparent) 58%, color-mix(in srgb, var(--bg) 78%, transparent) 84%, var(--bg) 100%);
+  box-shadow:
+    inset 0 0 0 1.25px rgba(35, 104, 232, 0.15),
+    inset 0 2.4rem 5rem rgba(35, 104, 232, 0.08);
+  opacity: 0.96;
+}
+
+.home-journey__globe canvas {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: calc(0px - var(--journey-globe-map-offset));
+  width: var(--journey-globe-diameter) !important;
+  height: var(--journey-globe-diameter) !important;
+  z-index: 1;
+  filter: saturate(0.96) contrast(1.08) brightness(1.02);
 }
 
 .home-journey__rail {
@@ -78,6 +159,7 @@
   color: var(--journey-rail);
   overflow: visible;
   transform: translateX(-50%);
+  z-index: 2;
 }
 
 .home-journey__rail-path {
@@ -127,6 +209,10 @@
   filter: drop-shadow(0 0 0.85rem var(--journey-glow-strong));
 }
 
+.home-journey__rail-bead image {
+  filter: drop-shadow(0 0 0.85rem var(--journey-glow-strong));
+}
+
 .home-journey__cards {
   position: absolute;
   left: 50%;
@@ -137,6 +223,7 @@
   transform: translateX(-50%);
   perspective: 1100px;
   pointer-events: none;
+  z-index: 3;
 }
 
 .home-journey__card {
@@ -212,6 +299,7 @@
   .home-journey {
     --journey-card-width: clamp(14.5rem, 32vw, 18rem);
     --journey-text-lift: clamp(5.5rem, 9vw, 7rem);
+    --journey-map-fade-height: clamp(7rem, 16vw, 13rem);
     height: 310vh;
     min-height: 88rem;
   }
@@ -222,6 +310,12 @@
 
   .home-journey__stage {
     --journey-rail-width: 122vw;
+    --journey-rail-rendered-height: 22.37vw;
+    --journey-rail-apex-offset: 9.35vw;
+    --journey-globe-diameter: 452vw;
+    --journey-globe-visible-depth: clamp(42rem, 96vw, 88rem);
+    --journey-globe-fade-height: clamp(30rem, 72vw, 64rem);
+    --journey-globe-map-offset: 0rem;
     width: min(100%, 68rem);
     min-height: clamp(31rem, 58vh, 39rem);
   }
@@ -231,6 +325,7 @@
   .home-journey {
     --journey-card-width: min(78vw, 20rem);
     --journey-text-lift: clamp(5.15rem, 15vw, 6.5rem);
+    --journey-map-fade-height: clamp(6rem, 22vw, 12rem);
     height: 325vh;
     min-height: 92rem;
   }
@@ -246,7 +341,12 @@
   .home-journey__stage {
     --journey-rail-bottom: clamp(4.2rem, 9vh, 6.3rem);
     --journey-rail-width: 210vw;
-    --journey-rail-height: clamp(10rem, 32vw, 14rem);
+    --journey-rail-rendered-height: 38.5vw;
+    --journey-rail-apex-offset: 16.09vw;
+    --journey-globe-diameter: 770vw;
+    --journey-globe-visible-depth: clamp(36rem, 116vw, 74rem);
+    --journey-globe-fade-height: clamp(26rem, 84vw, 56rem);
+    --journey-globe-map-offset: 0rem;
     min-height: clamp(36rem, 68vh, 43rem);
     margin-top: clamp(1.75rem, 4vh, 3rem);
   }
@@ -257,6 +357,7 @@
   .home-journey {
     --journey-card-width: min(84vw, 19rem);
     --journey-text-lift: clamp(4.85rem, 21vw, 6rem);
+    --journey-map-fade-height: clamp(5.5rem, 24vw, 10rem);
     min-height: 88rem;
   }
 
@@ -269,15 +370,18 @@
   }
 
   .home-journey__stage {
+    --journey-rail-width: 245vw;
+    --journey-rail-rendered-height: 44.92vw;
+    --journey-rail-apex-offset: 18.78vw;
+    --journey-globe-diameter: 905vw;
+    --journey-globe-visible-depth: clamp(34rem, 128vw, 64rem);
+    --journey-globe-fade-height: clamp(24rem, 92vw, 48rem);
+    --journey-globe-map-offset: 0rem;
     min-height: clamp(35rem, 70vh, 41rem);
   }
 
   .home-journey__card {
     min-height: 0;
-  }
-
-  .home-journey__rail {
-    width: 245vw;
   }
 
 }

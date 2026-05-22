@@ -16,7 +16,7 @@ const MAGIC_SEARCH_PROMPTS = [
 ]
 
 const AUTO_ADVANCE_MS = 3400
-const WHEEL_COOLDOWN_MS = 240
+const WHEEL_STEP_PX = 42
 const USER_PAUSE_MS = 4500
 const MAX_QUERY_LENGTH = 200
 const ANSWER_LINK_RE = /\[([^\]]+)\]\((\/[\w\-/]*)\)/g
@@ -171,7 +171,7 @@ export default function HomeMagicSearch() {
 
   const stageRef = useRef(null)
   const audioCtxRef = useRef(null)
-  const lastWheelRef = useRef(0)
+  const wheelAccumRef = useRef(0)
   const userActiveUntilRef = useRef(0)
   const inputRef = useRef(null)
   const answerRef = useRef(null)
@@ -204,11 +204,16 @@ export default function HomeMagicSearch() {
   }, [])
 
   const advance = useCallback(
-    (direction) => {
+    (delta) => {
+      const steps = Math.trunc(delta)
+      if (!steps) return
       setAnswer('')
       setErrorMessage('')
       setStatus('idle')
-      setSelectedIndex((prev) => (prev + direction + promptCount) % promptCount)
+      setSelectedIndex((prev) => {
+        const next = ((prev + steps) % promptCount + promptCount) % promptCount
+        return next
+      })
       userActiveUntilRef.current = performance.now() + USER_PAUSE_MS
       playTick()
     },
@@ -236,13 +241,17 @@ export default function HomeMagicSearch() {
 
     const onWheel = (event) => {
       if (mode !== 'picker') return
-      // Always swallow vertical scroll over the picker so the page doesn't move.
+      // Swallow vertical scroll over the picker so the page doesn't move,
+      // but advance the prompts proportionally to the wheel velocity so a
+      // fast scroll blazes through several prompts at once.
       event.preventDefault()
-      if (Math.abs(event.deltaY) < 4) return
-      const now = performance.now()
-      if (now - lastWheelRef.current < WHEEL_COOLDOWN_MS) return
-      lastWheelRef.current = now
-      advance(event.deltaY > 0 ? 1 : -1)
+      if (Math.abs(event.deltaY) < 1) return
+      wheelAccumRef.current += event.deltaY
+      const stepsRaw = wheelAccumRef.current / WHEEL_STEP_PX
+      const steps = stepsRaw >= 0 ? Math.floor(stepsRaw) : Math.ceil(stepsRaw)
+      if (steps === 0) return
+      wheelAccumRef.current -= steps * WHEEL_STEP_PX
+      advance(steps)
     }
 
     stage.addEventListener('wheel', onWheel, { passive: false })

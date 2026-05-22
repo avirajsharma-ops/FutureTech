@@ -12,7 +12,7 @@ import './TeamSection.css'
  * a fullscreen profile modal that scales open from the card's center.
  */
 
-const VISIBLE_COUNT = 4
+const VISIBLE_COUNT = 6
 const CYCLE_MS = 3200
 
 export default function TeamSection() {

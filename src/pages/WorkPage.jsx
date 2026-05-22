@@ -35,6 +35,7 @@ export default function WorkPage({ introStartRef }) {
         mobileScaleMultiplier={1.42}
         mobileYOffset={0.24}
         {...SILVER_MODEL_LIGHTING_PROPS}
+        backgroundImage="/images/hero-backgrounds/hero-bg-work.png"
       />
       <OffMenuGallery />
     </>

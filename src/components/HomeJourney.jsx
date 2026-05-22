@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import Globe from './Globe'
 import './HomeJourney.css'
 
 const JOURNEY_MILESTONES = [
@@ -46,7 +47,7 @@ const RAIL_VIEWBOX_WIDTH = 1200
 const RAIL_VIEWBOX_HEIGHT = 220
 const JOURNEY_ARC_STEP = 0.235
 const RAIL_PATH_SAMPLES = 96
-const SNAP_IDLE_MS = 160
+const GLOBE_SCROLL_ROTATION = Math.PI * 3.1
 
 const clampProgress = (value) => Math.min(Math.max(value, 0), 1)
 
@@ -58,15 +59,15 @@ const getRailPoint = (ratio) => {
   return { coordinateX, coordinateY }
 }
 
-const RAIL_PATH_D = (() => {
-  const segments = []
-  for (let index = 0; index <= RAIL_PATH_SAMPLES; index += 1) {
-    const ratio = index / RAIL_PATH_SAMPLES
-    const { coordinateX, coordinateY } = getRailPoint(ratio)
-    segments.push(`${index === 0 ? 'M' : 'L'} ${coordinateX.toFixed(2)} ${coordinateY.toFixed(2)}`)
-  }
-  return segments.join(' ')
-})()
+const railPathPoints = Array.from({ length: RAIL_PATH_SAMPLES + 1 }, (unusedValue, index) => {
+  void unusedValue
+  const ratio = index / RAIL_PATH_SAMPLES
+  return getRailPoint(ratio)
+})
+
+const RAIL_PATH_D = railPathPoints
+  .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.coordinateX.toFixed(2)} ${point.coordinateY.toFixed(2)}`)
+  .join(' ')
 
 const getRailTangent = (ratio) => {
   const clampedRatio = clampProgress(ratio)
@@ -159,47 +160,14 @@ export default function HomeJourney() {
   const trackPosition = progress * (JOURNEY_MILESTONES.length - 1)
   const activeIndex = Math.min(JOURNEY_MILESTONES.length - 1, Math.max(0, Math.round(trackPosition)))
   const beadPoint = getRailPoint(progress)
+  const globePhiRef = useRef(-2.2)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    globePhiRef.current = progress * GLOBE_SCROLL_ROTATION - 2.2
+  }, [progress])
 
-    let idleTimer = 0
-    let programmaticUntil = 0
-
-    const snapToNearest = () => {
-      const section = sectionRef.current
-      if (!section) return
-      if (performance.now() < programmaticUntil) return
-
-      const sectionTop = section.getBoundingClientRect().top + window.scrollY
-      const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1)
-      const relativeProgress = (window.scrollY - sectionTop) / scrollRange
-
-      if (relativeProgress <= 0.02 || relativeProgress >= 0.98) return
-
-      const steps = JOURNEY_MILESTONES.length - 1
-      const nearestIndex = Math.round(relativeProgress * steps)
-      const targetProgress = nearestIndex / steps
-      const targetScrollY = sectionTop + scrollRange * targetProgress
-
-      if (Math.abs(window.scrollY - targetScrollY) < 4) return
-
-      programmaticUntil = performance.now() + 900
-      window.scrollTo({ top: targetScrollY, behavior: 'smooth' })
-    }
-
-    const handleScroll = () => {
-      window.clearTimeout(idleTimer)
-      idleTimer = window.setTimeout(snapToNearest, SNAP_IDLE_MS)
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => {
-      window.clearTimeout(idleTimer)
-      window.removeEventListener('scroll', handleScroll)
-    }
+  useEffect(() => {
+    // Scroll snap intentionally disabled.
   }, [])
 
   const handleMilestoneSelect = (index) => {
@@ -225,6 +193,9 @@ export default function HomeJourney() {
         </div>
 
         <div className="home-journey__stage">
+          <div className="home-journey__globe" aria-hidden="true">
+            <Globe phiRef={globePhiRef} />
+          </div>
           <svg className="home-journey__rail" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
             <path className="home-journey__rail-path home-journey__rail-path--ghost" d={RAIL_PATH_D} />
             <path className="home-journey__rail-path" d={RAIL_PATH_D} />
@@ -262,7 +233,14 @@ export default function HomeJourney() {
                 transform: `translate(${beadPoint.coordinateX}px, ${beadPoint.coordinateY}px) rotate(${getRailAngle(progress)}deg)`,
               }}
             >
-              <path d="M -10 -8 L 6 0 L -10 8 Z" />
+              <image
+                href="/images/satellite-bead.png"
+                x="-22"
+                y="-22"
+                width="44"
+                height="44"
+                preserveAspectRatio="xMidYMid meet"
+              />
             </g>
           </svg>
 

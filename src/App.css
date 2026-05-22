@@ -34,13 +34,13 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: url('/images/graffiti-hero.png');
+  background-image: var(--hero-bg-image, url('/images/graffiti-hero.png'));
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  opacity: 0.24;
+  opacity: 0.32;
   mix-blend-mode: multiply;
-  filter: grayscale(1) contrast(0.82) brightness(1.16);
+  filter: contrast(0.95) brightness(1.05) saturate(0.9);
   transform: scale(1.03);
   transform-origin: 50% 50%;
   -webkit-mask-image: radial-gradient(circle at center, var(--hero-graffiti-mask-strong) 0%, var(--hero-graffiti-mask-strong) calc(var(--hero-reveal) * 0.32), var(--hero-graffiti-mask-medium) calc(var(--hero-reveal) * 0.56), var(--hero-graffiti-mask-soft) calc(var(--hero-reveal) * 0.80), var(--hero-graffiti-mask-clear) var(--hero-reveal));
@@ -61,16 +61,16 @@
   0% {
     opacity: 0;
     --hero-reveal: 0%;
-    filter: grayscale(1) contrast(0.82) brightness(1.16) blur(18px);
+    filter: contrast(0.95) brightness(1.05) saturate(0.9) blur(18px);
   }
   55% {
-    opacity: 0.2;
-    filter: grayscale(1) contrast(0.82) brightness(1.16) blur(6px);
+    opacity: 0.26;
+    filter: contrast(0.95) brightness(1.05) saturate(0.9) blur(6px);
   }
   100% {
-    opacity: 0.24;
+    opacity: 0.32;
     --hero-reveal: 100%;
-    filter: grayscale(1) contrast(0.82) brightness(1.16) blur(0);
+    filter: contrast(0.95) brightness(1.05) saturate(0.9) blur(0);
   }
 }
 
@@ -107,9 +107,9 @@
 }
 
 :root[data-theme='dark'] .hero-section::before {
-  opacity: 0.14;
+  opacity: 0.22;
   mix-blend-mode: screen;
-  filter: invert(1) grayscale(1) contrast(0.72) brightness(1.08);
+  filter: contrast(0.85) brightness(0.95) saturate(0.85);
 }
 
 :root[data-theme='dark'] .hero-section:not(.is-loading)::before {
@@ -120,16 +120,16 @@
   0% {
     opacity: 0;
     --hero-reveal: 0%;
-    filter: invert(1) grayscale(1) contrast(0.72) brightness(1.08) blur(18px);
+    filter: contrast(0.85) brightness(0.95) saturate(0.85) blur(18px);
   }
   55% {
-    opacity: 0.12;
-    filter: invert(1) grayscale(1) contrast(0.72) brightness(1.08) blur(6px);
+    opacity: 0.18;
+    filter: contrast(0.85) brightness(0.95) saturate(0.85) blur(6px);
   }
   100% {
-    opacity: 0.14;
+    opacity: 0.22;
     --hero-reveal: 100%;
-    filter: invert(1) grayscale(1) contrast(0.72) brightness(1.08) blur(0);
+    filter: contrast(0.85) brightness(0.95) saturate(0.85) blur(0);
   }
 }
 

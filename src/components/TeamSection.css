@@ -61,12 +61,12 @@
   transform-style: preserve-3d;
   width: 100%;
   max-width: 760px;
-  height: 340px;
+  height: 460px;
   transition: height 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .team-stack.is-hovered {
-  height: 500px;
+  height: 740px;
 }
 
 /* ─── Card ─── */
@@ -107,40 +107,52 @@
 }
 
 /* Stack ordering — slot 0 = OLDEST (top/back/blurred);
-   slot 3 = NEWEST (bottom/front/sharp). The Y offsets deliberately
+   slot 5 = NEWEST (bottom/front/sharp). The Y offsets deliberately
    expose the previous cards above the active one, matching the source
    card demo instead of hiding everything behind one card. */
 .team-card--slot-0 {
-  transform: translateY(0) translateZ(-150px) scale(0.92);
-  opacity: 0.48;
-  filter: blur(4px);
+  transform: translateY(0) translateZ(-220px) scale(0.88);
+  opacity: 0.36;
+  filter: blur(5px);
   z-index: 1;
 }
 .team-card--slot-1 {
-  transform: translateY(64px) translateZ(-70px) scale(0.96);
-  opacity: 0.72;
-  filter: blur(2px);
+  transform: translateY(56px) translateZ(-150px) scale(0.91);
+  opacity: 0.5;
+  filter: blur(3.5px);
   z-index: 2;
 }
 .team-card--slot-2 {
-  transform: translateY(128px) translateZ(65px) scale(0.99);
-  opacity: 0.95;
-  filter: blur(0.6px);
+  transform: translateY(116px) translateZ(-70px) scale(0.95);
+  opacity: 0.72;
+  filter: blur(2px);
   z-index: 3;
 }
 .team-card--slot-3 {
-  transform: translateY(192px) translateZ(190px) scale(1.02);
+  transform: translateY(180px) translateZ(20px) scale(0.98);
+  opacity: 0.88;
+  filter: blur(1px);
+  z-index: 4;
+}
+.team-card--slot-4 {
+  transform: translateY(244px) translateZ(110px) scale(1.00);
+  opacity: 0.96;
+  filter: blur(0.4px);
+  z-index: 5;
+}
+.team-card--slot-5 {
+  transform: translateY(308px) translateZ(210px) scale(1.02);
   opacity: 1;
   filter: blur(0);
-  z-index: 4;
+  z-index: 6;
 }
 
 /* The outgoing front card slips just past the viewer and fades quickly. */
 .team-card--out {
-  transform: translateY(252px) translateZ(280px) scale(1.04);
+  transform: translateY(368px) translateZ(300px) scale(1.04);
   opacity: 0;
   filter: blur(1.5px);
-  z-index: 5;
+  z-index: 7;
   pointer-events: none;
 }
 
@@ -160,6 +172,12 @@
 }
 .team-stack.is-hovered .team-card--slot-3 {
   transform: translateY(372px) translateZ(0) scale(1);
+}
+.team-stack.is-hovered .team-card--slot-4 {
+  transform: translateY(496px) translateZ(0) scale(1);
+}
+.team-stack.is-hovered .team-card--slot-5 {
+  transform: translateY(620px) translateZ(0) scale(1);
 }
 .team-stack.is-hovered .team-card--out {
   /* While expanded, just hide the off-stack cards. */
@@ -249,19 +267,25 @@
     height: 68px;
   }
   .team-card--slot-0 {
-    transform: translateY(0) translateZ(-115px) scale(0.93);
+    transform: translateY(0) translateZ(-170px) scale(0.9);
   }
   .team-card--slot-1 {
-    transform: translateY(48px) translateZ(-56px) scale(0.96);
+    transform: translateY(42px) translateZ(-115px) scale(0.93);
   }
   .team-card--slot-2 {
-    transform: translateY(96px) translateZ(52px) scale(0.99);
+    transform: translateY(86px) translateZ(-56px) scale(0.95);
   }
   .team-card--slot-3 {
-    transform: translateY(144px) translateZ(132px) scale(1.01);
+    transform: translateY(132px) translateZ(20px) scale(0.97);
+  }
+  .team-card--slot-4 {
+    transform: translateY(180px) translateZ(90px) scale(0.99);
+  }
+  .team-card--slot-5 {
+    transform: translateY(228px) translateZ(160px) scale(1.01);
   }
   .team-card--out {
-    transform: translateY(190px) translateZ(190px) scale(1.03);
+    transform: translateY(276px) translateZ(220px) scale(1.03);
   }
   .team-stack.is-hovered .team-card--slot-1 {
     transform: translateY(118px) translateZ(0) scale(1);
@@ -271,6 +295,12 @@
   }
   .team-stack.is-hovered .team-card--slot-3 {
     transform: translateY(354px) translateZ(0) scale(1);
+  }
+  .team-stack.is-hovered .team-card--slot-4 {
+    transform: translateY(472px) translateZ(0) scale(1);
+  }
+  .team-stack.is-hovered .team-card--slot-5 {
+    transform: translateY(590px) translateZ(0) scale(1);
   }
 }
 

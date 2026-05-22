@@ -380,6 +380,7 @@ export default function HeroScene({
   toneMappingExposure,
   introAxis,
   introStartOffset,
+  backgroundImage,
 }) {
   const enableIntro = Boolean(introStartRef)
   // If the cached blob URL is already resolved (true on every navigation
@@ -552,7 +553,11 @@ export default function HeroScene({
   }
 
   return (
-    <section className="hero-section" ref={heroSectionRef}>
+    <section
+      className="hero-section"
+      ref={heroSectionRef}
+      style={backgroundImage ? { '--hero-bg-image': `url('${backgroundImage}')` } : undefined}
+    >
       <div
         className="hero-canvas-wrap"
         onPointerDown={handlePointerDown}
