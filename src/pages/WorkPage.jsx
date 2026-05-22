@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import HeroScene, { SILVER_MODEL_LIGHTING_PROPS } from '../components/HeroScene'
 import OffMenuGallery from '../components/OffMenuGallery'
+import SplineScene from '../components/SplineScene'
 import {
   WORK_MODEL_URL,
   workModelPromise,
   getWorkModelReady,
   getWorkModelUrl,
 } from '../lib/workModel'
+import './WorkPage.css'
 
 export default function WorkPage({ introStartRef }) {
   // Seed cached blob URL synchronously when available.
@@ -37,6 +39,9 @@ export default function WorkPage({ introStartRef }) {
         {...SILVER_MODEL_LIGHTING_PROPS}
         backgroundImage="/images/hero-backgrounds/hero-bg-work.png"
       />
+      <section className="work-spline-section" aria-label="Interactive work showcase">
+        <SplineScene className="work-spline-section__viewer" />
+      </section>
       <OffMenuGallery />
     </>
   )
