@@ -51,6 +51,12 @@ const GLOBE_SCROLL_ROTATION = Math.PI * 3.1
 
 const clampProgress = (value) => Math.min(Math.max(value, 0), 1)
 
+const smoothProgress = (value) => {
+  const clampedValue = clampProgress(value)
+
+  return clampedValue * clampedValue * (3 - 2 * clampedValue)
+}
+
 const getRailPoint = (ratio) => {
   const clampedRatio = clampProgress(ratio)
   const coordinateX = -80 + clampedRatio * 1360
@@ -160,32 +166,21 @@ export default function HomeJourney() {
   const trackPosition = progress * (JOURNEY_MILESTONES.length - 1)
   const activeIndex = Math.min(JOURNEY_MILESTONES.length - 1, Math.max(0, Math.round(trackPosition)))
   const beadPoint = getRailPoint(progress)
+  const finalCardStartProgress = (JOURNEY_MILESTONES.length - 1.5) / (JOURNEY_MILESTONES.length - 1)
+  const bottomFadeOpacity = smoothProgress((progress - finalCardStartProgress) / 0.12)
   const globePhiRef = useRef(-2.2)
 
   useEffect(() => {
     globePhiRef.current = progress * GLOBE_SCROLL_ROTATION - 2.2
   }, [progress])
 
-  useEffect(() => {
-    // Scroll snap intentionally disabled.
-  }, [])
-
-  const handleMilestoneSelect = (index) => {
-    const section = sectionRef.current
-    if (!section) return
-
-    const sectionTop = section.getBoundingClientRect().top + window.scrollY
-    const scrollRange = Math.max(section.offsetHeight - window.innerHeight, 1)
-    const targetProgress = index / (JOURNEY_MILESTONES.length - 1)
-
-    window.scrollTo({
-      top: sectionTop + scrollRange * targetProgress,
-      behavior: 'smooth',
-    })
-  }
-
   return (
-    <section ref={sectionRef} className="home-journey" aria-labelledby="home-journey-title">
+    <section
+      ref={sectionRef}
+      className="home-journey"
+      aria-labelledby="home-journey-title"
+      style={{ '--journey-bottom-fade-opacity': bottomFadeOpacity }}
+    >
       <div className="home-journey__sticky">
         <div className="home-journey__header">
           <p className="home-journey__eyebrow">Built in motion</p>
@@ -254,20 +249,16 @@ export default function HomeJourney() {
               const opacity = Math.max(0.16, 1 - distance * 0.44)
 
               return (
-                <button
+                <article
                   key={milestone.phase}
-                  type="button"
                   role="listitem"
                   className={`home-journey__card${isActive ? ' is-active' : ''}`}
                   aria-label={milestone.title}
                   aria-current={isActive ? 'step' : undefined}
-                  tabIndex={distance <= 1.55 ? 0 : -1}
-                  onClick={() => handleMilestoneSelect(index)}
                   style={{
                     left: `${(arcPoint.coordinateX / RAIL_VIEWBOX_WIDTH) * 100}%`,
                     top: `${(arcPoint.coordinateY / RAIL_VIEWBOX_HEIGHT) * 100}%`,
                     zIndex: Math.round(20 - distance * 4),
-                    pointerEvents: distance > 2.2 ? 'none' : 'auto',
                     opacity,
                     transform: `translate3d(-50%, calc(-100% - var(--journey-text-lift)), 0) scale(${scale})`,
                   }}
@@ -276,7 +267,7 @@ export default function HomeJourney() {
                   <span className="home-journey__kicker">{milestone.kicker}</span>
                   <strong>{milestone.title}</strong>
                   <span className="home-journey__body">{milestone.body}</span>
-                </button>
+                </article>
               )
             })}
           </div>
