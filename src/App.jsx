@@ -12,10 +12,6 @@ import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import DirectorPage from './pages/DirectorPage'
 import SpadeClonePage from './pages/SpadeClonePage'
-import { HERO_MODEL_URL } from './lib/heroModel'
-import { COIN_MODEL_URL } from './lib/coinModel'
-import { WORK_MODEL_URL } from './lib/workModel'
-import { SERVICES_MODEL_URL } from './lib/servicesModel'
 import { useDesktopScaleCompensation } from './hooks/useDesktopScaleCompensation'
 import './styles/liquid-glass.css'
 import './App.css'
@@ -23,21 +19,6 @@ import './App.css'
 const PAGE_FADE_DURATION = 0.28
 const MODEL_INTRO_ARM_DELAY = 500
 const MODEL_INTRO_PATHS = new Set(['/', '/work', '/news-events', '/about'])
-
-// Assets to opportunistically prefetch once the homepage is idle.
-// Non-render-blocking: injected via <link rel="prefetch"> after first paint.
-const PREFETCH_ASSETS = [HERO_MODEL_URL, COIN_MODEL_URL, WORK_MODEL_URL, SERVICES_MODEL_URL]
-
-function injectPrefetch(href, as) {
-  if (typeof document === 'undefined') return
-  if (document.querySelector(`link[data-prefetch="${href}"]`)) return
-  const link = document.createElement('link')
-  link.rel = 'prefetch'
-  link.href = href
-  if (as) link.as = as
-  link.dataset.prefetch = href
-  document.head.appendChild(link)
-}
 
 function getModelIntroPath(pathname) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/+$/, '')
@@ -58,23 +39,6 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
-
-  // Background asset prefetch — runs after first paint, never blocks render.
-  useEffect(() => {
-    const idle =
-      window.requestIdleCallback ||
-      ((cb) => setTimeout(cb, 600))
-    const id = idle(() => {
-      PREFETCH_ASSETS.forEach((href) => injectPrefetch(href))
-    })
-    return () => {
-      if (window.cancelIdleCallback && typeof id === 'number') {
-        window.cancelIdleCallback(id)
-      } else {
-        clearTimeout(id)
-      }
-    }
-  }, [])
 
   // Scroll to top whenever the route changes.
   useEffect(() => {

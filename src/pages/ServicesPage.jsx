@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { useGLTF } from '@react-three/drei'
+import { useEffect } from 'react'
 import HeroScene from '../components/HeroScene'
 import ExpertiseSection from '../components/ExpertiseSection'
 import {
@@ -10,25 +9,11 @@ import {
 } from '../lib/servicesModel'
 
 export default function ServicesPage({ introStartRef }) {
-  const [servicesModelUrl, setServicesModelUrl] = useState(
-    getServicesModelReady() ? getServicesModelUrl() : SERVICES_MODEL_URL,
-  )
+  const servicesModelUrl = getServicesModelReady() ? getServicesModelUrl() : SERVICES_MODEL_URL
 
   useEffect(() => {
     if (getServicesModelReady()) return
-    let mounted = true
-    servicesModelPromise.then((url) => {
-      if (!mounted) return
-      setServicesModelUrl(url)
-      try {
-        useGLTF.preload(url)
-      } catch {
-        // Best-effort cache warm-up for route transition clones.
-      }
-    })
-    return () => {
-      mounted = false
-    }
+    servicesModelPromise.catch(() => { })
   }, [])
 
   return (

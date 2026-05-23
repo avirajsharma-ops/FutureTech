@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import HeroScene, { SILVER_MODEL_LIGHTING_PROPS } from '../components/HeroScene'
 import TeamSection from '../components/TeamSection'
 import {
@@ -11,19 +11,11 @@ import {
 export default function AboutPage({ introStartRef }) {
   // Seed synchronously when the cached blob URL is already resolved
   // (true on every navigation after the coin has been prefetched).
-  const [coinUrl, setCoinUrl] = useState(
-    getCoinModelReady() ? getCoinModelUrl() : COIN_MODEL_URL,
-  )
+  const coinUrl = getCoinModelReady() ? getCoinModelUrl() : COIN_MODEL_URL
 
   useEffect(() => {
     if (getCoinModelReady()) return
-    let mounted = true
-    coinModelPromise.then((url) => {
-      if (mounted) setCoinUrl(url)
-    })
-    return () => {
-      mounted = false
-    }
+    coinModelPromise.catch(() => { })
   }, [])
 
   return (

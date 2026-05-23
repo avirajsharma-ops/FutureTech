@@ -1,8 +1,8 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Environment, useGLTF } from '@react-three/drei'
 import { Box3, Color, PMREMGenerator, Vector3 } from 'three'
-import { HERO_MODEL_URL, heroModelPromise, getHeroModelReady, getHeroModelUrl } from '../lib/heroModel'
+import { heroModelPromise, getHeroModelReady, getHeroModelUrl } from '../lib/heroModel'
 
 const REST_Z = 0
 const END_X_ROTATION = -0.18
@@ -10,6 +10,11 @@ const START_Y_ROTATION = 0.92
 const REST_Y_ROTATION = -0.75
 const TOP_OFFSET_RATIO = 0.15
 const INTRO_ROTATE_SECONDS = 2.4
+const INTRO_ACTIVE_RENDER_MS = 5200
+const STATIC_ACTIVE_RENDER_MS = 1800
+const INTERACTION_ACTIVE_RENDER_MS = 900
+const POINTER_ACTIVE_RENDER_MS = 220
+const SCROLL_ACTIVE_RENDER_MS = 320
 
 // Subtle parallax bounds (radians). Keep small so it feels alive but never busy.
 const POINTER_TILT_X = 0.08 // tilt up/down based on mouse Y
@@ -89,7 +94,7 @@ function HeroModel({
   // mount steals the scene from the first. Cloning gives every canvas
   // its own independent copy.
   const clonedScene = useMemo(() => scene.clone(true), [scene])
-  const { viewport, size, gl, camera } = useThree()
+  const { viewport, size } = useThree()
   const isMobile = size.width <= 768
 
   useEffect(() => {
@@ -147,15 +152,8 @@ function HeroModel({
         }
       }
     })
-    try {
-      gl.compile(clonedScene, camera)
-    } catch {
-      // older three versions
-    }
   }, [
     clonedScene,
-    gl,
-    camera,
     isMobile,
     materialColor,
     materialMetalness,
@@ -391,7 +389,10 @@ export default function HeroScene({
     modelUrlProp || (getHeroModelReady() ? getHeroModelUrl() : null),
   )
   const [, setIsSceneReady] = useState(false)
-  const [frameloop, setFrameloop] = useState('always')
+  const [isVisible, setIsVisible] = useState(true)
+  const [isRenderActive, setIsRenderActive] = useState(true)
+  const renderActiveRef = useRef(true)
+  const renderIdleTimerRef = useRef(null)
   const dragCurrentRef = useRef(0)
   const dragTargetRef = useRef(0)
   const scrollYRef = useRef(0)
@@ -407,10 +408,39 @@ export default function HeroScene({
     }),
     [],
   )
+  const frameloop = isVisible ? (isRenderActive ? 'always' : 'demand') : 'never'
   const ambientLightIntensity = ambientIntensity ?? (deviceProfile.lowPower ? 1.35 : 1.15)
   const keyLight = keyLightIntensity ?? (deviceProfile.lowPower ? 2.6 : 2.3)
   const fillLight = fillLightIntensity ?? (deviceProfile.lowPower ? 1.5 : 1.25)
   const frontLightValue = frontLightIntensity ?? (deviceProfile.lowPower ? 2.4 : 2.0)
+
+  const scheduleRenderIdle = useCallback((duration) => {
+    window.clearTimeout(renderIdleTimerRef.current)
+    renderIdleTimerRef.current = window.setTimeout(() => {
+      renderActiveRef.current = false
+      setIsRenderActive(false)
+    }, duration)
+  }, [])
+
+  const activateRenderLoop = useCallback((duration = INTERACTION_ACTIVE_RENDER_MS) => {
+    if (!renderActiveRef.current) {
+      renderActiveRef.current = true
+      setIsRenderActive(true)
+    }
+    scheduleRenderIdle(duration)
+  }, [scheduleRenderIdle])
+
+  useEffect(() => () => {
+    window.clearTimeout(renderIdleTimerRef.current)
+  }, [])
+
+  useEffect(() => {
+    if (!modelUrl) return undefined
+    const startTimer = window.setTimeout(() => {
+      activateRenderLoop(enableIntro ? INTRO_ACTIVE_RENDER_MS : STATIC_ACTIVE_RENDER_MS)
+    }, 0)
+    return () => window.clearTimeout(startTimer)
+  }, [activateRenderLoop, enableIntro, modelUrl])
 
   const updatePointerTilt = (node, clientX, clientY) => {
     const rect = node.getBoundingClientRect()
@@ -437,7 +467,10 @@ export default function HeroScene({
     let io
     const startTimer = setTimeout(() => {
       io = new IntersectionObserver(
-        ([entry]) => setFrameloop(entry.isIntersecting ? 'always' : 'never'),
+        ([entry]) => {
+          setIsVisible(entry.isIntersecting)
+          if (entry.isIntersecting) activateRenderLoop(STATIC_ACTIVE_RENDER_MS)
+        },
         { threshold: 0.01 },
       )
       io.observe(node)
@@ -446,16 +479,25 @@ export default function HeroScene({
       clearTimeout(startTimer)
       io?.disconnect()
     }
-  }, [])
+  }, [activateRenderLoop])
 
   // Scroll → model rotation hook (homepage uses this; harmless on inner pages).
   useEffect(() => {
+    let frameId = 0
     const onScroll = () => {
       scrollYRef.current = window.scrollY
+      if (frameId) return
+      frameId = window.requestAnimationFrame(() => {
+        frameId = 0
+        activateRenderLoop(SCROLL_ACTIVE_RENDER_MS)
+      })
     }
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (frameId) window.cancelAnimationFrame(frameId)
+    }
+  }, [activateRenderLoop])
 
   // Resolve cached model URL (for the homepage hand-off path) and
   // pre-warm drei's GLTF cache for that exact URL so subsequent mounts
@@ -479,25 +521,6 @@ export default function HeroScene({
     }
   }, [modelUrlProp])
 
-  // Pointer-driven subtle tilt. Window mousemove keeps the hero alive
-  // even when the user is not dragging; pointer handlers below also
-  // update it directly so touch-capable laptops and DevTools emulation
-  // still get mouse/pen interaction when those events are available.
-  useEffect(() => {
-    if (deviceProfile.touch) return
-    const node = heroSectionRef.current
-    if (!node) return
-    const onMove = (e) => {
-      updatePointerTilt(node, e.clientX, e.clientY)
-    }
-    window.addEventListener('mousemove', onMove)
-    node.addEventListener('mouseleave', resetPointerTilt)
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      node.removeEventListener('mouseleave', resetPointerTilt)
-    }
-  }, [deviceProfile.touch])
-
   const handlePointerDown = (e) => {
     pointerRef.current.active = true
     pointerRef.current.lastX = e.clientX
@@ -509,10 +532,12 @@ export default function HeroScene({
       e.currentTarget.setPointerCapture?.(e.pointerId)
       pointerRef.current.captured = true
     }
+    activateRenderLoop(INTERACTION_ACTIVE_RENDER_MS)
   }
   const handlePointerMove = (e) => {
-    if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
+    if (!deviceProfile.lowPower && (e.pointerType === 'mouse' || e.pointerType === 'pen')) {
       updatePointerTilt(e.currentTarget, e.clientX, e.clientY)
+      activateRenderLoop(POINTER_ACTIVE_RENDER_MS)
     }
     if (!pointerRef.current.active) return
     const dx = e.clientX - pointerRef.current.lastX
@@ -537,6 +562,7 @@ export default function HeroScene({
       -1.35,
       Math.min(1.35, dragTargetRef.current + dx * 0.006 * dragSign),
     )
+    activateRenderLoop(INTERACTION_ACTIVE_RENDER_MS)
   }
   const handlePointerUp = (e) => {
     pointerRef.current.active = false
@@ -545,6 +571,7 @@ export default function HeroScene({
       e.currentTarget.releasePointerCapture?.(e.pointerId)
       pointerRef.current.captured = false
     }
+    activateRenderLoop(INTERACTION_ACTIVE_RENDER_MS)
   }
 
   const handlePointerLeave = (e) => {
@@ -569,7 +596,7 @@ export default function HeroScene({
         {modelUrl && (
           <Canvas
             camera={{ fov: 10, position: [0, 0.95, 18] }}
-            dpr={deviceProfile.lowPower ? 1 : [1, 1.25]}
+            dpr={deviceProfile.lowPower ? [0.75, 1] : [1, 1.15]}
             frameloop={frameloop}
             gl={{
               antialias: false,
@@ -617,7 +644,10 @@ export default function HeroScene({
                 introStartRef={introStartRef}
                 pointerTiltRef={pointerTiltRef}
                 enableIntro={enableIntro}
-                onLoaded={() => setIsSceneReady(true)}
+                onLoaded={() => {
+                  setIsSceneReady(true)
+                  activateRenderLoop(enableIntro ? INTRO_ACTIVE_RENDER_MS : STATIC_ACTIVE_RENDER_MS)
+                }}
                 baseRotation={baseRotation}
                 scaleMultiplier={scaleMultiplier}
                 mobileOnlyScale={mobileOnlyScale}
@@ -650,5 +680,3 @@ export default function HeroScene({
     </section>
   )
 }
-
-useGLTF.preload(HERO_MODEL_URL)

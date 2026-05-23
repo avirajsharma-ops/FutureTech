@@ -19,7 +19,24 @@
  *   COIN.getUrl()       // current best URL (blob if ready, else raw)
  */
 
-const CACHE_KEY = 'mwft-model-cache-v2'
+const CACHE_KEY = 'mwft-model-cache-v3'
+
+function createLazyPromise(factory) {
+  let promise = null
+  const getPromise = () => {
+    if (!promise) promise = factory()
+    return promise
+  }
+
+  return {
+    then: (...args) => getPromise().then(...args),
+    catch: (...args) => getPromise().catch(...args),
+    finally: (...args) => getPromise().finally(...args),
+    get [Symbol.toStringTag]() {
+      return 'Promise'
+    },
+  }
+}
 
 async function fetchAndCache(url) {
   if (typeof window === 'undefined' || !('caches' in window)) return url
@@ -54,11 +71,11 @@ export function registerModel(url) {
     _resolvedUrl: url,
     promise: null,
   }
-  entry.promise = fetchAndCache(url).then((resolvedUrl) => {
+  entry.promise = createLazyPromise(() => fetchAndCache(url).then((resolvedUrl) => {
     entry._resolvedUrl = resolvedUrl
     entry._resolved = true
     return resolvedUrl
-  })
+  }))
   REGISTRY.set(url, entry)
   return entry
 }
