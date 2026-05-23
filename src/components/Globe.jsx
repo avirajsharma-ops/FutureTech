@@ -121,20 +121,20 @@ export default function Globe({
             return
           }
 
-        earthTexture = texture
-        texture.colorSpace = THREE.SRGBColorSpace
-        texture.anisotropy = lowPower ? 1 : Math.min(renderer.capabilities.getMaxAnisotropy(), 4)
-        earthMaterial.map = texture
-        earthMaterial.needsUpdate = true
-        canvas.style.opacity = '1'
-        requestRenderRef.current?.()
-      },
-      undefined,
-      () => {
-        canvas.style.opacity = '1'
-        requestRenderRef.current?.()
-      },
-    )
+          earthTexture = texture
+          texture.colorSpace = THREE.SRGBColorSpace
+          texture.anisotropy = lowPower ? 1 : Math.min(renderer.capabilities.getMaxAnisotropy(), 4)
+          earthMaterial.map = texture
+          earthMaterial.needsUpdate = true
+          canvas.style.opacity = '1'
+          requestRenderRef.current?.()
+        },
+        undefined,
+        () => {
+          canvas.style.opacity = '1'
+          requestRenderRef.current?.()
+        },
+      )
     }
 
     const resize = () => {
