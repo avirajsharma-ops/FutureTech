@@ -1,31 +1,48 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
-const EARTH_TEXTURE_URL = '/images/earth-blue-marble-8192.webp'
-const MAX_RENDER_SIZE = 3200
+const EARTH_TEXTURE_URL = '/images/earth-blue-marble-2048.webp'
+const MAX_RENDER_SIZE = 1800
+
+const isLowPowerDevice = () => {
+  if (typeof navigator === 'undefined' || typeof window === 'undefined') return false
+  const cores = navigator.hardwareConcurrency || 8
+  const memory = navigator.deviceMemory || 8
+  return window.innerWidth <= 768 || cores <= 4 || memory <= 4
+}
 
 export default function Globe({
   className = '',
   style,
+  phi = 0,
   phiRef,
 }) {
   const canvasRef = useRef(null)
+  const latestPhiRef = useRef(phi)
+  const requestRenderRef = useRef(null)
+
+  useEffect(() => {
+    latestPhiRef.current = phi
+    requestRenderRef.current?.()
+  }, [phi])
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return undefined
 
+    const lowPower = isLowPowerDevice()
     let disposed = false
     let frameId = 0
+    let visible = true
     let earthTexture = null
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: false,
+      antialias: !lowPower,
       alpha: true,
       powerPreference: 'high-performance',
     })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.4))
     renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.NoToneMapping
@@ -48,7 +65,8 @@ export default function Globe({
     globeGroup.rotation.x = -0.08
     scene.add(globeGroup)
 
-    const earthGeometry = new THREE.SphereGeometry(1, 64, 64)
+    const segmentCount = lowPower ? 32 : 48
+    const earthGeometry = new THREE.SphereGeometry(1, segmentCount, segmentCount)
     const earthMaterial = new THREE.MeshStandardMaterial({
       transparent: true,
       opacity: 0.98,
@@ -60,7 +78,7 @@ export default function Globe({
     const earthMesh = new THREE.Mesh(earthGeometry, earthMaterial)
     globeGroup.add(earthMesh)
 
-    const depthGeometry = new THREE.SphereGeometry(1.004, 64, 64)
+    const depthGeometry = new THREE.SphereGeometry(1.004, segmentCount, segmentCount)
     const depthMaterial = new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
@@ -103,18 +121,20 @@ export default function Globe({
             return
           }
 
-          earthTexture = texture
-          texture.colorSpace = THREE.SRGBColorSpace
-          texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
-          earthMaterial.map = texture
-          earthMaterial.needsUpdate = true
-          canvas.style.opacity = '1'
-        },
-        undefined,
-        () => {
-          canvas.style.opacity = '1'
-        },
-      )
+        earthTexture = texture
+        texture.colorSpace = THREE.SRGBColorSpace
+        texture.anisotropy = lowPower ? 1 : Math.min(renderer.capabilities.getMaxAnisotropy(), 4)
+        earthMaterial.map = texture
+        earthMaterial.needsUpdate = true
+        canvas.style.opacity = '1'
+        requestRenderRef.current?.()
+      },
+      undefined,
+      () => {
+        canvas.style.opacity = '1'
+        requestRenderRef.current?.()
+      },
+    )
     }
 
     const resize = () => {
@@ -122,52 +142,52 @@ export default function Globe({
       const height = Math.max(canvas.offsetHeight, 1)
       const renderScale = Math.min(1, MAX_RENDER_SIZE / Math.max(width, height))
       renderer.setSize(Math.ceil(width * renderScale), Math.ceil(height * renderScale), false)
+      requestRenderRef.current?.()
     }
 
-    const observer = new ResizeObserver(resize)
-    observer.observe(canvas)
+    const resizeObserver = new ResizeObserver(resize)
+    resizeObserver.observe(canvas)
     resize()
 
-    // Pause the render loop when the canvas leaves the viewport. The Globe
-    // is a continuous animation in the middle of the page — letting it
-    // keep rendering when the user has scrolled past wastes a full GPU
-    // frame budget on every other section.
-    let isVisible = true
-    let intersectionObserver = null
+    const render = () => {
+      frameId = 0
+      if (disposed || !visible) return
+      globeGroup.rotation.y = phiRef?.current ?? latestPhiRef.current
+      renderer.render(scene, camera)
+    }
+
+    const requestRender = () => {
+      if (disposed || !visible || frameId) return
+      frameId = window.requestAnimationFrame(render)
+    }
+
+    requestRenderRef.current = requestRender
+
+    let intersectionObserver
     if (typeof IntersectionObserver !== 'undefined') {
-      isVisible = false // wait for the observer to confirm visibility
+      visible = false
       intersectionObserver = new IntersectionObserver(
         ([entry]) => {
-          const wasVisible = isVisible
-          isVisible = entry.isIntersecting
-          if (isVisible) startTextureLoad()
-          if (!wasVisible && isVisible) {
-            // Resume the loop after being paused.
-            frameId = window.requestAnimationFrame(render)
+          visible = entry.isIntersecting
+          if (visible) {
+            startTextureLoad()
+            requestRender()
           }
         },
-        { rootMargin: '400px' },
+        { rootMargin: '200px', threshold: 0.01 },
       )
       intersectionObserver.observe(canvas)
     } else {
       startTextureLoad()
     }
 
-    const render = () => {
-      globeGroup.rotation.y = phiRef?.current ?? 0
-      renderer.render(scene, camera)
-      if (isVisible) {
-        frameId = window.requestAnimationFrame(render)
-      } else {
-        frameId = 0
-      }
-    }
-    render()
+    requestRender()
 
     return () => {
       disposed = true
       window.cancelAnimationFrame(frameId)
-      observer.disconnect()
+      requestRenderRef.current = null
+      resizeObserver.disconnect()
       intersectionObserver?.disconnect()
 
       earthGeometry.dispose()

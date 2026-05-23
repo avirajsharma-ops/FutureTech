@@ -168,11 +168,7 @@ export default function HomeJourney() {
   const beadPoint = getRailPoint(progress)
   const finalCardStartProgress = (JOURNEY_MILESTONES.length - 1.5) / (JOURNEY_MILESTONES.length - 1)
   const bottomFadeOpacity = smoothProgress((progress - finalCardStartProgress) / 0.12)
-  const globePhiRef = useRef(-2.2)
-
-  useEffect(() => {
-    globePhiRef.current = progress * GLOBE_SCROLL_ROTATION - 2.2
-  }, [progress])
+  const globePhi = progress * GLOBE_SCROLL_ROTATION - 2.2
 
   return (
     <section
@@ -189,7 +185,7 @@ export default function HomeJourney() {
 
         <div className="home-journey__stage">
           <div className="home-journey__globe" aria-hidden="true">
-            <Globe phiRef={globePhiRef} />
+            <Globe phi={globePhi} />
           </div>
           <svg className="home-journey__rail" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
             <path className="home-journey__rail-path home-journey__rail-path--ghost" d={RAIL_PATH_D} />

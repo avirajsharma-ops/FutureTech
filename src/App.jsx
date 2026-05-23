@@ -1,10 +1,15 @@
-import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Loader from './components/Loader'
 import LiquidGlassDefs from './components/LiquidGlassDefs'
+import { useDesktopScaleCompensation } from './hooks/useDesktopScaleCompensation'
+import { useLenisScroll } from './hooks/useLenisScroll'
+import './styles/liquid-glass.css'
+import './App.css'
+
 const HomePage = lazy(() => import('./pages/HomePage'))
 const WorkPage = lazy(() => import('./pages/WorkPage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
@@ -12,15 +17,8 @@ const AboutPage = lazy(() => import('./pages/AboutPage'))
 const ContactPage = lazy(() => import('./pages/ContactPage'))
 const DirectorPage = lazy(() => import('./pages/DirectorPage'))
 const SpadeClonePage = lazy(() => import('./pages/SpadeClonePage'))
-import { HERO_MODEL_URL } from './lib/heroModel'
-import { COIN_MODEL_URL } from './lib/coinModel'
-import { WORK_MODEL_URL } from './lib/workModel'
-import { SERVICES_MODEL_URL } from './lib/servicesModel'
-import { useDesktopScaleCompensation } from './hooks/useDesktopScaleCompensation'
-import './styles/liquid-glass.css'
-import './App.css'
 
-const PAGE_FADE_DURATION = 0.28
+const PAGE_FADE_DURATION = 0.42
 const MODEL_INTRO_ARM_DELAY = 500
 const MODEL_INTRO_PATHS = new Set(['/', '/work', '/news-events', '/about'])
 
@@ -31,13 +29,14 @@ function getModelIntroPath(pathname) {
 
 export default function App() {
   useDesktopScaleCompensation()
+  const location = useLocation()
+  const isSpadeClone = location.pathname.replace(/\/+$/, '') === '/spade'
+  const lenisRef = useLenisScroll({ disabled: isSpadeClone })
   const [theme] = useState('light')
   const introStartRefs = useRef(
     Object.fromEntries([...MODEL_INTRO_PATHS].map((path) => [path, { current: null }])),
   )
   const [loaderComplete, setLoaderComplete] = useState(false)
-  const location = useLocation()
-  const isSpadeClone = location.pathname.replace(/\/+$/, '') === '/spade'
   const modelIntroPath = isSpadeClone ? null : getModelIntroPath(location.pathname)
 
   useEffect(() => {
@@ -46,8 +45,13 @@ export default function App() {
 
   // Scroll to top whenever the route changes.
   useEffect(() => {
+    const lenis = lenisRef.current
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true, force: true })
+      return
+    }
     window.scrollTo({ top: 0, behavior: 'instant' })
-  }, [location.pathname])
+  }, [lenisRef, location.pathname])
 
   useLayoutEffect(() => {
     if (!modelIntroPath) return undefined
@@ -87,10 +91,10 @@ export default function App() {
         <motion.main
           key={location.pathname}
           className="page-live"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: PAGE_FADE_DURATION, ease: 'easeOut' }}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: PAGE_FADE_DURATION, ease: [0.16, 1, 0.3, 1] }}
         >
           <Suspense fallback={null}>
             <Routes location={location}>

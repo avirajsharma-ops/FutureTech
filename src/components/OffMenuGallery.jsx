@@ -158,6 +158,30 @@ function wrapIndex(value, count) {
   return ((value % count) + count) % count
 }
 
+function useElementVisibility(ref, rootMargin = '0px') {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return undefined
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true)
+      return undefined
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { rootMargin, threshold: 0.01 },
+    )
+    observer.observe(node)
+
+    return () => observer.disconnect()
+  }, [ref, rootMargin])
+
+  return visible
+}
+
 function getRotationTarget(progress, count) {
   if (progress <= 0.2) {
     return -(progress / 0.2) * TAU
@@ -200,7 +224,7 @@ function IntroHeading({ progress }) {
   )
 }
 
-function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, rotationRef }) {
+function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, rotationRef, active }) {
   const rootRef = useRef(null)
   const containerRef = useRef(null)
   const spheresRef = useRef([])
@@ -243,9 +267,12 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
 
   useEffect(() => {
     if (!rootRef.current || !containerRef.current) return undefined
+    if (!active) return undefined
 
     let frameId = 0
     const count = projects.length
+    lastTimeRef.current = performance.now()
+    introStartRef.current = performance.now()
 
     const tick = (time) => {
       frameId = requestAnimationFrame(tick)
@@ -348,7 +375,7 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
     frameId = requestAnimationFrame(tick)
 
     return () => cancelAnimationFrame(frameId)
-  }, [onFocusedIndexChange, projects.length, rotationRef])
+  }, [active, onFocusedIndexChange, projects.length, rotationRef])
 
   return (
     <motion.div
@@ -391,7 +418,7 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
                   if (hoverIndexRef.current === index) hoverIndexRef.current = null
                 }}
               >
-                <img src={project.image} alt="" draggable="false" loading="lazy" decoding="async" className="offmenu-gallery__sphere-image" />
+                <img src={active ? project.image : undefined} alt="" draggable="false" loading="lazy" decoding="async" className="offmenu-gallery__sphere-image" />
               </a>
             ))}
           </div>
@@ -461,16 +488,18 @@ function ProjectSidePanels({ projects, focusedIndex, settledIndex, visible }) {
   )
 }
 
-function OrbitalDots({ count, rotationRef }) {
+function OrbitalDots({ count, rotationRef, active }) {
   const rootRef = useRef(null)
   const startRef = useRef(performance.now())
 
   useEffect(() => {
     const root = rootRef.current
     if (!root) return undefined
+    if (!active) return undefined
 
     const dots = Array.from(root.querySelectorAll('[data-dot-index]'))
     let frameId = 0
+    startRef.current = performance.now()
 
     const tick = (time) => {
       frameId = requestAnimationFrame(tick)
@@ -501,7 +530,7 @@ function OrbitalDots({ count, rotationRef }) {
     frameId = requestAnimationFrame(tick)
 
     return () => cancelAnimationFrame(frameId)
-  }, [count, rotationRef])
+  }, [active, count, rotationRef])
 
   return (
     <div className="offmenu-gallery__dots" ref={rootRef} aria-hidden="true">
@@ -606,6 +635,7 @@ function ProjectDetailOverlay({ activeProject, onClose }) {
 export default function OffMenuGallery() {
   const sectionRef = useRef(null)
   const rotationRef = useRef(0)
+  const galleryActive = useElementVisibility(sectionRef)
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [settledIndex, setSettledIndex] = useState(null)
   const [controlsVisible, setControlsVisible] = useState(false)
@@ -699,6 +729,7 @@ export default function OffMenuGallery() {
           onFocusedIndexChange={setFocusedIndex}
           onProjectOpen={(project, origin) => setActiveProject({ project, origin })}
           rotationRef={rotationRef}
+          active={galleryActive}
         />
         <div className="offmenu-gallery__intro">
           <IntroHeading progress={scrollYProgress} />
@@ -709,7 +740,7 @@ export default function OffMenuGallery() {
           settledIndex={settledIndex}
           visible={controlsVisible}
         />
-        <OrbitalDots count={PROJECTS.length} rotationRef={rotationRef} />
+        <OrbitalDots count={PROJECTS.length} rotationRef={rotationRef} active={galleryActive} />
       </div>
       <ProjectDetailOverlay activeProject={activeProject} onClose={() => setActiveProject(null)} />
     </section>
