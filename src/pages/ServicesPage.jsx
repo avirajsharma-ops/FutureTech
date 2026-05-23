@@ -27,7 +27,7 @@ export default function ServicesPage({ introStartRef }) {
         mobileScaleMultiplier={1.56}
         yOffset={0.32}
         mobileYOffset={0.44}
-        backgroundImage="/images/hero-backgrounds/hero-bg-services.png"
+        backgroundImage="/images/hero-backgrounds/hero-bg-services.webp"
       />
       <ExpertiseSection />
     </>

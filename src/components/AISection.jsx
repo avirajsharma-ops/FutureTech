@@ -50,12 +50,14 @@ const CONNECTOR_PATHS = ICON_X.map((x, i) => ({
 
 /* ── Unified SVG connector lines ── */
 function ConnectorLines({ isInView, showDesktopConnector }) {
+  if (!isInView || !showDesktopConnector) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : {}}
       transition={{ duration: 1, delay: 0.3 }}
-      className={showDesktopConnector ? 'flex justify-center -mt-1 relative z-0' : 'hidden'}
+      className="flex justify-center -mt-1 relative z-0"
       style={{ overflow: 'visible' }}
     >
       <svg viewBox="0 0 600 280" className="w-full max-w-4xl" style={{ overflow: 'visible', height: 'auto', minHeight: '13.75rem' }} fill="none">
@@ -70,6 +72,11 @@ function ConnectorLines({ isInView, showDesktopConnector }) {
             <stop offset="0%" stopColor="#c4a17b" />
             <stop offset="100%" stopColor="#2368e8" />
           </radialGradient>
+          <linearGradient id="aiVerticalLineGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2368e8" />
+            <stop offset="45%" stopColor="#69a7ff" />
+            <stop offset="100%" stopColor="#c4a17b" />
+          </linearGradient>
         </defs>
 
         {CONNECTOR_PATHS.map((p, i) => (
@@ -153,11 +160,16 @@ function ConnectorLines({ isInView, showDesktopConnector }) {
           <animate attributeName="opacity" values="0.15;0.05;0.15" dur="2s" repeatCount="indefinite" />
         </circle>
 
-        {/* Vertical line from converge point downward (extends past viewBox via overflow:visible) */}
-        <line x1={CONVERGE.x} y1={CONVERGE.y} x2={CONVERGE.x} y2="500" stroke="url(#aiCenterGlow)" strokeWidth="2" opacity="0.55" />
-        <line x1={CONVERGE.x} y1={CONVERGE.y} x2={CONVERGE.x} y2="500" stroke="#2368e8" strokeWidth="1.2" opacity="0.9" />
-        {/* Glow around the vertical line */}
-        <line x1={CONVERGE.x} y1={CONVERGE.y} x2={CONVERGE.x} y2="500" stroke="#2368e8" strokeWidth="8" opacity="0.1" />
+        {/* Vertical line from converge point downward — clean, no glow halo. */}
+        <line
+          x1={CONVERGE.x}
+          y1={CONVERGE.y}
+          x2={CONVERGE.x}
+          y2="500"
+          stroke="#2368e8"
+          strokeWidth="1.2"
+          opacity="0.9"
+        />
         {/* Flowing dot down the connector */}
         <circle r="2.5" fill="#2368e8" opacity="0.85">
           <animateMotion dur="2s" repeatCount="indefinite" path={`M${CONVERGE.x},${CONVERGE.y} L${CONVERGE.x},500`} />
@@ -173,19 +185,33 @@ function IconBox({ icon: Icon, color, label, index, isInView }) {
   const [glowing, setGlowing] = useState(false);
 
   useEffect(() => {
-    if (!isInView) return;
-    // Start glow cycle — matches the SVG wave departure timing
+    if (!isInView) {
+      setGlowing(false);
+      return undefined;
+    }
+
+    // Start glow cycle — matches the SVG wave departure timing.
     const ms = dur * 1000;
-    const startDelay = setTimeout(() => {
+    let intervalId = null;
+    let glowOffTimeout = null;
+
+    const pulse = () => {
       setGlowing(true);
-      const id = setInterval(() => {
-        setGlowing(true);
-        setTimeout(() => setGlowing(false), 280);
-      }, ms);
-      setTimeout(() => setGlowing(false), 280);
-      return () => clearInterval(id);
+      if (glowOffTimeout) window.clearTimeout(glowOffTimeout);
+      glowOffTimeout = window.setTimeout(() => setGlowing(false), 280);
+    };
+
+    const startDelay = window.setTimeout(() => {
+      pulse();
+      intervalId = window.setInterval(pulse, ms);
     }, 300); // match SVG entry delay
-    return () => clearTimeout(startDelay);
+
+    return () => {
+      window.clearTimeout(startDelay);
+      if (intervalId) window.clearInterval(intervalId);
+      if (glowOffTimeout) window.clearTimeout(glowOffTimeout);
+      setGlowing(false);
+    };
   }, [isInView, dur]);
 
   return (
@@ -222,7 +248,7 @@ function IconBox({ icon: Icon, color, label, index, isInView }) {
 export function AISection() {
   const sectionRef = useRef(null);
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-10%' });
+  const isInView = useInView(ref, { margin: '-10%' });
   const showDesktopConnector = useCompensatedMinWidth(768);
 
   const { scrollYProgress } = useScroll({
@@ -235,7 +261,7 @@ export function AISection() {
   return (
     <section
       ref={sectionRef}
-      className="relative z-10 py-20 md:py-28"
+      className="relative z-10 pt-6 pb-20 md:pt-10 md:pb-28"
       style={{ overflow: 'visible', background: 'var(--bg)', color: 'var(--text)' }}
     >
       {/* Background texture */}

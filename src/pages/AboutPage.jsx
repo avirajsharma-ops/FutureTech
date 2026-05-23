@@ -44,7 +44,7 @@ export default function AboutPage({ introStartRef }) {
         introStartRef={introStartRef}
         introAxis="z"
         introStartOffset={1.6}
-        backgroundImage="/images/hero-backgrounds/hero-bg-about.png"
+        backgroundImage="/images/hero-backgrounds/hero-bg-about.webp"
       />
       <TeamSection />
     </>

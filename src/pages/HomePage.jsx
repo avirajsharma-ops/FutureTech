@@ -12,7 +12,7 @@ export default function HomePage({ introStartRef }) {
         title="Engineering Tomorrow, In Real Time."
         tagline="Intelligent systems, adaptive design, and next-generation technology built to move business forward."
         introStartRef={introStartRef}
-        backgroundImage="/images/hero-backgrounds/hero-bg-home.png"
+        backgroundImage="/images/hero-backgrounds/hero-bg-home.webp"
         {...SILVER_MODEL_LIGHTING_PROPS}
       />
       <AISection />
@@ -23,3 +23,4 @@ export default function HomePage({ introStartRef }) {
     </div>
   )
 }
+

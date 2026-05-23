@@ -465,7 +465,7 @@
   border-bottom-left-radius: var(--magic-pod-radius);
   border-bottom-right-radius: var(--magic-pod-radius);
   overflow: hidden;
-  animation: home-magic-search-grow 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: home-magic-search-fade 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .home-magic-search__answer::before {
@@ -533,7 +533,6 @@
 
 .home-magic-search__ghost-word {
   display: inline-block;
-  will-change: transform, opacity;
 }
 
 .home-magic-search__answer-link {
@@ -558,11 +557,6 @@
 @keyframes home-magic-search-fade {
   0%   { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes home-magic-search-grow {
-  0%   { opacity: 0; transform: translateY(-6px); max-height: 0; }
-  100% { opacity: 1; transform: translateY(0); max-height: 30rem; }
 }
 
 @keyframes home-magic-search-spin {

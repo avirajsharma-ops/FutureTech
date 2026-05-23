@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
-const EARTH_TEXTURE_URL = '/images/earth-blue-marble-8192.png'
+const EARTH_TEXTURE_URL = '/images/earth-blue-marble-8192.webp'
 const MAX_RENDER_SIZE = 3200
 
 export default function Globe({
@@ -21,11 +21,11 @@ export default function Globe({
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias: false,
       alpha: true,
       powerPreference: 'high-performance',
     })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
     renderer.setClearColor(0x000000, 0)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.NoToneMapping
@@ -91,26 +91,31 @@ export default function Globe({
 
     const textureLoader = new THREE.TextureLoader()
     textureLoader.setCrossOrigin('anonymous')
-    textureLoader.load(
-      EARTH_TEXTURE_URL,
-      (texture) => {
-        if (disposed) {
-          texture.dispose()
-          return
-        }
+    let textureLoadStarted = false
+    const startTextureLoad = () => {
+      if (textureLoadStarted || disposed) return
+      textureLoadStarted = true
+      textureLoader.load(
+        EARTH_TEXTURE_URL,
+        (texture) => {
+          if (disposed) {
+            texture.dispose()
+            return
+          }
 
-        earthTexture = texture
-        texture.colorSpace = THREE.SRGBColorSpace
-        texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
-        earthMaterial.map = texture
-        earthMaterial.needsUpdate = true
-        canvas.style.opacity = '1'
-      },
-      undefined,
-      () => {
-        canvas.style.opacity = '1'
-      },
-    )
+          earthTexture = texture
+          texture.colorSpace = THREE.SRGBColorSpace
+          texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
+          earthMaterial.map = texture
+          earthMaterial.needsUpdate = true
+          canvas.style.opacity = '1'
+        },
+        undefined,
+        () => {
+          canvas.style.opacity = '1'
+        },
+      )
+    }
 
     const resize = () => {
       const width = Math.max(canvas.offsetWidth, 1)
@@ -123,10 +128,39 @@ export default function Globe({
     observer.observe(canvas)
     resize()
 
+    // Pause the render loop when the canvas leaves the viewport. The Globe
+    // is a continuous animation in the middle of the page — letting it
+    // keep rendering when the user has scrolled past wastes a full GPU
+    // frame budget on every other section.
+    let isVisible = true
+    let intersectionObserver = null
+    if (typeof IntersectionObserver !== 'undefined') {
+      isVisible = false // wait for the observer to confirm visibility
+      intersectionObserver = new IntersectionObserver(
+        ([entry]) => {
+          const wasVisible = isVisible
+          isVisible = entry.isIntersecting
+          if (isVisible) startTextureLoad()
+          if (!wasVisible && isVisible) {
+            // Resume the loop after being paused.
+            frameId = window.requestAnimationFrame(render)
+          }
+        },
+        { rootMargin: '400px' },
+      )
+      intersectionObserver.observe(canvas)
+    } else {
+      startTextureLoad()
+    }
+
     const render = () => {
       globeGroup.rotation.y = phiRef?.current ?? 0
       renderer.render(scene, camera)
-      frameId = window.requestAnimationFrame(render)
+      if (isVisible) {
+        frameId = window.requestAnimationFrame(render)
+      } else {
+        frameId = 0
+      }
     }
     render()
 
@@ -134,6 +168,7 @@ export default function Globe({
       disposed = true
       window.cancelAnimationFrame(frameId)
       observer.disconnect()
+      intersectionObserver?.disconnect()
 
       earthGeometry.dispose()
       depthGeometry.dispose()

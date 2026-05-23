@@ -158,7 +158,7 @@ export default function TeamSection() {
                   }
                 }}
               >
-                <img src={m.img} alt="" className="team-card__avatar" />
+                <img src={m.img} alt="" loading="lazy" decoding="async" className="team-card__avatar" />
                 <div className="team-card__content">
                   <h3>{m.name}</h3>
                   <p className="team-card__quote">{m.quote}</p>

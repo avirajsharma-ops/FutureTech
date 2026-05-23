@@ -24,6 +24,26 @@ export default defineConfig(({ mode }) => {
       // namespace+inner-default workaround in PrivacySection.jsx.
       include: ['lottie-react', 'lottie-web'],
     },
+    build: {
+      // Split heavy vendors out of the main app chunk so the initial
+      // payload stays small and big libraries (three.js, framer-motion,
+      // lottie-web) load in parallel / on demand.
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined
+            if (id.includes('three') || id.includes('@react-three')) return 'vendor-three'
+            if (id.includes('lottie-')) return 'vendor-lottie'
+            if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion'
+            if (id.includes('gsap')) return 'vendor-gsap'
+            if (id.includes('react-router')) return 'vendor-router'
+            if (id.includes('lucide-react')) return 'vendor-icons'
+            return undefined
+          },
+        },
+      },
+      chunkSizeWarningLimit: 800,
+    },
   }
 })
 

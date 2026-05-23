@@ -1,12 +1,17 @@
 import { motion, useInView, useScroll, useTransform, useMotionValue, useSpring, useMotionValueEvent, AnimatePresence } from 'motion/react';
-import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { ShieldCheck, Lock, Eye, EyeOff, Database, Server, Fingerprint } from 'lucide-react';
-import * as LottieMod from 'lottie-react';
+import { lazy } from 'react';
 import { useCompensatedMinWidth } from '../hooks/useZoomCompensatedViewport';
 
-// Vite's CJS interop double-wraps lottie-react's default export
-// ({ default: { default: Lottie, ... } }). Resolve to the real component.
-const Lottie = LottieMod.default?.default || LottieMod.default;
+// Lottie + lottie-web together weigh ~250 KB. Pull them out of the main
+// HomePage chunk so the initial paint never pays for them — they only
+// load once PrivacySection mounts (already deep below the fold).
+const Lottie = lazy(async () => {
+  const mod = await import('lottie-react');
+  const Component = mod.default?.default || mod.default;
+  return { default: Component };
+});
 
 const PRIVACY_GRADIENT =
   'linear-gradient(90deg, #2368e8 0%, #4f8df0 35%, #69a7ff 65%, #c4a17b 100%)';
@@ -60,13 +65,17 @@ export function PrivacySection() {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hasRevealed, setHasRevealed] = useState(false);
 
-  // Load Lottie JSON
+  // Defer the lock-unlock JSON until the section is near the viewport.
+  // Avoids parsing/decoding the animation data on first paint.
   useEffect(() => {
+    if (!isInView) return undefined;
+    let cancelled = false;
     fetch('/lock-unlock.json')
       .then((res) => res.json())
-      .then(setLottieData)
+      .then((data) => { if (!cancelled) setLottieData(data); })
       .catch(() => {});
-  }, []);
+    return () => { cancelled = true; };
+  }, [isInView]);
 
   // Scroll-mapped Lottie frame control
   const { scrollYProgress } = useScroll({
@@ -379,17 +388,19 @@ export function PrivacySection() {
               />
               <div className="relative w-full h-full flex items-center justify-center">
                 {lottieData && (
-                  <Lottie
-                    lottieRef={lottieRef}
-                    animationData={lottieData}
-                    autoplay={false}
-                    loop={false}
-                    className="w-32 h-32 md:w-44 md:h-44 lg:w-48 lg:h-48"
-                    style={{
-                      filter:
-                        'drop-shadow(0 0.5rem 1rem color-mix(in srgb, #2368e8 35%, transparent)) contrast(1.05)',
-                    }}
-                  />
+                  <Suspense fallback={null}>
+                    <Lottie
+                      lottieRef={lottieRef}
+                      animationData={lottieData}
+                      autoplay={false}
+                      loop={false}
+                      className="w-32 h-32 md:w-44 md:h-44 lg:w-48 lg:h-48"
+                      style={{
+                        filter:
+                          'drop-shadow(0 0.5rem 1rem color-mix(in srgb, #2368e8 35%, transparent)) contrast(1.05)',
+                      }}
+                    />
+                  </Suspense>
                 )}
               </div>
             </motion.div>

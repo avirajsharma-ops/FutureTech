@@ -1,71 +1,111 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll } from 'motion/react'
+import {
+  BarChart3,
+  Bot,
+  Cloud,
+  Code2,
+  Cpu,
+  Database,
+  Globe,
+  Server,
+  ShieldCheck,
+  Smartphone,
+  Workflow,
+  Zap,
+} from 'lucide-react'
 import './OffMenuGallery.css'
+
+const STACK_ICON_MAP = {
+  react: { label: 'React', Icon: Code2 },
+  vite: { label: 'Vite', Icon: Zap },
+  node: { label: 'Node.js', Icon: Server },
+  express: { label: 'Express', Icon: Workflow },
+  postgres: { label: 'PostgreSQL', Icon: Database },
+  mongodb: { label: 'MongoDB', Icon: Database },
+  redis: { label: 'Redis', Icon: Database },
+  aws: { label: 'AWS', Icon: Cloud },
+  gcp: { label: 'GCP', Icon: Cloud },
+  mobile: { label: 'Mobile', Icon: Smartphone },
+  ai: { label: 'AI', Icon: Bot },
+  analytics: { label: 'Analytics', Icon: BarChart3 },
+  iot: { label: 'IoT', Icon: Cpu },
+  web: { label: 'Web', Icon: Globe },
+  secure: { label: 'Security', Icon: ShieldCheck },
+}
 
 const PROJECTS = [
   {
     title: 'Gurujii AI Companion',
     slug: 'gurujii-ai-companion',
-    image: '/mockups/Mockup%201.png',
+    image: '/mockups/Mockup%201.webp',
     category: 'AI avatar experience',
     description: 'A conversational spiritual guide experience with live face detection, voice interaction, and an immersive mobile-first flow.',
     details: ['Realtime AI conversation', 'Character-led voice UX', 'Mobile app interface'],
+    stack: ['react', 'vite', 'node', 'ai', 'mobile'],
   },
   {
     title: 'Poonam Sagar Wellness',
     slug: 'poonam-sagar-wellness',
-    image: '/mockups/Mockup%20Scene%204.png',
+    image: '/mockups/Mockup%20Scene%204.webp',
     category: 'Health and wellness platform',
     description: 'A polished digital presence for diet consultation, appointment booking, and conversion-focused wellness discovery.',
     details: ['Responsive marketing site', 'Appointment funnel', 'Wellness brand system'],
+    stack: ['web', 'react', 'vite', 'analytics', 'secure'],
   },
   {
     title: 'Tallo Productivity OS',
     slug: 'tallo-productivity-os',
-    image: '/mockups/Mockup%20Ribbon%206.png',
+    image: '/mockups/Mockup%20Ribbon%206.webp',
     category: 'AI productivity workspace',
     description: 'A sharp SaaS interface for planning, visibility, and team workflows, built around fast scanning and confident action.',
     details: ['SaaS dashboard design', 'Task workflow UX', 'AI planning surface'],
+    stack: ['react', 'node', 'postgres', 'analytics', 'ai'],
   },
   {
     title: 'MedFlow HMS',
     slug: 'medflow-hms',
-    image: '/mockups/Mockup%205.png',
+    image: '/mockups/Mockup%205.webp',
     category: 'Hospital management system',
     description: 'A hospital operations platform for bed management, role-based access, revenue analytics, and real-time care coordination.',
     details: ['Operations dashboard', 'Role-based access', 'Revenue analytics'],
+    stack: ['react', 'node', 'postgres', 'secure', 'analytics'],
   },
   {
     title: 'Mayalogy',
     slug: 'mayalogy',
-    image: '/mockups/Mockup%207.png',
+    image: '/mockups/Mockup%207.webp',
     category: 'Astrology AI assistant',
     description: 'A dual-device conversational astrology product with guided onboarding, Hindi-first content, and a premium dark interface.',
     details: ['Conversational AI', 'Native mobile flows', 'Hindi-first experience'],
+    stack: ['mobile', 'ai', 'react', 'node', 'aws'],
   },
   {
     title: 'AlgaeTree Control Center',
     slug: 'algaetree-control-center',
-    image: '/mockups/Mockup%2012.png',
+    image: '/mockups/Mockup%2012.webp',
     category: 'IoT monitoring dashboard',
     description: 'A device control center for bio-reactor monitoring, system health, and environmental controls across connected hardware.',
     details: ['IoT device controls', 'Sensor health tracking', 'Environmental automation'],
+    stack: ['iot', 'react', 'node', 'mongodb', 'cloud'],
   },
   {
     title: 'Canact Social Motion',
     slug: 'canact-social-motion',
-    image: '/mockups/Mockup%2013.png',
+    image: '/mockups/Mockup%2013.webp',
     category: 'Social impact mobile app',
     description: 'A location-aware social product that turns community actions into measurable impact with scores, discovery, and progress loops.',
     details: ['Location-aware UX', 'Impact scoring', 'Mobile community flows'],
+    stack: ['mobile', 'react', 'node', 'analytics', 'gcp'],
   },
   {
     title: 'DubWala',
     slug: 'dubwala',
-    image: '/mockups/Mockup%20Scene%206.png',
+    image: '/mockups/Mockup%20Scene%206.webp',
     category: 'AI video dubbing tool',
     description: 'A creator workflow for uploading video or audio, selecting target languages, and generating multilingual voice output.',
     details: ['AI dubbing workflow', 'Multilingual selection', 'Creator upload system'],
+    stack: ['ai', 'react', 'node', 'aws', 'web'],
   },
 ]
 
@@ -292,9 +332,16 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
         const hoverScale = previousHoverScale + (hoverTarget - previousHoverScale) * 0.15
         hoverScaleRef.current.set(index, hoverScale)
 
+        // Fade spheres near top/bottom of the orbit — only once they enter large/zoomed mode.
+        const verticalAbs = Math.abs(positionY)
+        const edgeFade = 1 - clamp((verticalAbs - 0.34) / 0.55)
+        const fadedOpacity = 0.08 + 0.92 * smootherstep(edgeFade)
+        const sphereOpacity = 1 - (1 - fadedOpacity) * zoom
+
         element.style.setProperty('--pos-x', positionX.toString())
         element.style.setProperty('--pos-y', (-positionY).toString())
         element.style.transform = `translate(calc(var(--pos-x) * max(400px, 80cqmin)), calc(var(--pos-y) * max(400px, 80cqmin))) scale(${focusScale * depthScale * hoverScale})`
+        element.style.opacity = sphereOpacity.toFixed(3)
       })
     }
 
@@ -344,7 +391,7 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
                   if (hoverIndexRef.current === index) hoverIndexRef.current = null
                 }}
               >
-                <img src={project.image} alt="" draggable="false" className="offmenu-gallery__sphere-image" />
+                <img src={project.image} alt="" draggable="false" loading="lazy" decoding="async" className="offmenu-gallery__sphere-image" />
               </a>
             ))}
           </div>
@@ -354,31 +401,62 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
   )
 }
 
-function WorkTitles({ projects, focusedIndex, visible }) {
-  return (
-    <div className="offmenu-gallery__titles" style={{ opacity: visible ? 1 : 0 }}>
-      <div className="offmenu-gallery__titles-wrap">
-        <div className="offmenu-gallery__title-stack">
-          {projects.map((project, index) => {
-            const active = index === focusedIndex
-            const before = index < focusedIndex
+function ProjectSidePanels({ projects, focusedIndex, settledIndex, visible }) {
+  const activeIndex = settledIndex ?? focusedIndex
+  const project = projects[activeIndex]
 
-            return (
-              <div key={project.slug} className={index === 0 ? 'offmenu-gallery__title-item' : 'offmenu-gallery__title-item offmenu-gallery__title-item--stacked'}>
-                <h3
-                  className="offmenu-gallery__title"
-                  style={{
-                    transform: `translateY(${active ? 0 : before ? -110 : 110}%)`,
-                    opacity: active ? 1 : 0,
-                  }}
-                >
-                  {project.title}
-                </h3>
-              </div>
-            )
-          })}
-        </div>
-      </div>
+  return (
+    <div className="offmenu-gallery__project-meta" style={{ opacity: visible ? 1 : 0 }}>
+      <AnimatePresence mode="wait">
+        {visible && settledIndex !== null && project ? (
+          <motion.div
+            key={project.slug}
+            className="offmenu-gallery__project-meta-grid"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <motion.aside
+              className="offmenu-gallery__meta-card offmenu-gallery__meta-card--left"
+              initial={{ opacity: 0, x: -24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <p className="offmenu-gallery__meta-eyebrow">Project Snapshot</p>
+              <h3 className="offmenu-gallery__meta-title">{project.title}</h3>
+              <p className="offmenu-gallery__meta-description">{project.description}</p>
+            </motion.aside>
+
+            <motion.aside
+              className="offmenu-gallery__meta-card offmenu-gallery__meta-card--right"
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 16 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <p className="offmenu-gallery__meta-eyebrow">Stack Used</p>
+              <ul className="offmenu-gallery__stack-list" aria-label="Project technology stack">
+                {project.stack.map((stackKey) => {
+                  const stackMeta = STACK_ICON_MAP[stackKey]
+                  if (!stackMeta) return null
+                  const Icon = stackMeta.Icon
+
+                  return (
+                    <li key={`${project.slug}-${stackKey}`} className="offmenu-gallery__stack-pill">
+                      <span className="offmenu-gallery__stack-icon" aria-hidden="true">
+                        <Icon size={14} strokeWidth={2.1} />
+                      </span>
+                      <span>{stackMeta.label}</span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </motion.aside>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }
@@ -490,7 +568,7 @@ function ProjectDetailOverlay({ activeProject, onClose }) {
               aria-labelledby={`offmenu-project-title-${activeProject.project.slug}`}
             >
               <div className="offmenu-project__media">
-                <img src={activeProject.project.image} alt={`${activeProject.project.title} mockup`} />
+                <img src={activeProject.project.image} alt={`${activeProject.project.title} mockup`} loading="lazy" decoding="async" />
               </div>
 
               <motion.div
@@ -529,12 +607,46 @@ export default function OffMenuGallery() {
   const sectionRef = useRef(null)
   const rotationRef = useRef(0)
   const [focusedIndex, setFocusedIndex] = useState(0)
+  const [settledIndex, setSettledIndex] = useState(null)
   const [controlsVisible, setControlsVisible] = useState(false)
   const [activeProject, setActiveProject] = useState(null)
+  const audioCtxRef = useRef(null)
+  const lastTickTimeRef = useRef(0)
+  const previousFocusedIndexRef = useRef(0)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end end'],
   })
+
+  const playScrollTick = useCallback(() => {
+    if (typeof window === 'undefined') return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+
+    const now = performance.now()
+    if (now - lastTickTimeRef.current < 90) return
+    lastTickTimeRef.current = now
+
+    try {
+      const AudioCtor = window.AudioContext || window.webkitAudioContext
+      if (!AudioCtor) return
+      if (!audioCtxRef.current) audioCtxRef.current = new AudioCtor()
+      const ctx = audioCtxRef.current
+      if (ctx.state === 'suspended') ctx.resume()
+
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.value = 1320
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.03, ctx.currentTime + 0.005)
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05)
+      osc.connect(gain).connect(ctx.destination)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 0.06)
+    } catch {
+      // Audio is optional for scroll feedback.
+    }
+  }, [])
 
   useEffect(() => {
     const update = (value) => setControlsVisible(value >= 0.2)
@@ -542,6 +654,41 @@ export default function OffMenuGallery() {
 
     return scrollYProgress.on('change', update)
   }, [scrollYProgress])
+
+  useEffect(() => {
+    if (!controlsVisible) {
+      setSettledIndex(null)
+      return undefined
+    }
+
+    setSettledIndex(null)
+    const timer = window.setTimeout(() => {
+      setSettledIndex(focusedIndex)
+    }, 1500)
+
+    return () => window.clearTimeout(timer)
+  }, [focusedIndex, controlsVisible])
+
+  useEffect(() => {
+    if (!controlsVisible) {
+      previousFocusedIndexRef.current = focusedIndex
+      return
+    }
+
+    if (previousFocusedIndexRef.current !== focusedIndex) {
+      playScrollTick()
+      previousFocusedIndexRef.current = focusedIndex
+    }
+  }, [controlsVisible, focusedIndex, playScrollTick])
+
+  useEffect(() => () => {
+    if (!audioCtxRef.current) return
+    try {
+      audioCtxRef.current.close()
+    } catch {
+      // ignore close failures
+    }
+  }, [])
 
   return (
     <section ref={sectionRef} className="offmenu-gallery" aria-label="Orbital selected work gallery">
@@ -556,7 +703,12 @@ export default function OffMenuGallery() {
         <div className="offmenu-gallery__intro">
           <IntroHeading progress={scrollYProgress} />
         </div>
-        <WorkTitles projects={PROJECTS} focusedIndex={focusedIndex} visible={controlsVisible} />
+        <ProjectSidePanels
+          projects={PROJECTS}
+          focusedIndex={focusedIndex}
+          settledIndex={settledIndex}
+          visible={controlsVisible}
+        />
         <OrbitalDots count={PROJECTS.length} rotationRef={rotationRef} />
       </div>
       <ProjectDetailOverlay activeProject={activeProject} onClose={() => setActiveProject(null)} />

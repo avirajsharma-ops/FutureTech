@@ -1,17 +1,21 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Loader from './components/Loader'
 import LiquidGlassDefs from './components/LiquidGlassDefs'
-import HomePage from './pages/HomePage'
-import WorkPage from './pages/WorkPage'
-import ServicesPage from './pages/ServicesPage'
-import AboutPage from './pages/AboutPage'
-import ContactPage from './pages/ContactPage'
-import DirectorPage from './pages/DirectorPage'
-import SpadeClonePage from './pages/SpadeClonePage'
+const HomePage = lazy(() => import('./pages/HomePage'))
+const WorkPage = lazy(() => import('./pages/WorkPage'))
+const ServicesPage = lazy(() => import('./pages/ServicesPage'))
+const AboutPage = lazy(() => import('./pages/AboutPage'))
+const ContactPage = lazy(() => import('./pages/ContactPage'))
+const DirectorPage = lazy(() => import('./pages/DirectorPage'))
+const SpadeClonePage = lazy(() => import('./pages/SpadeClonePage'))
+import { HERO_MODEL_URL } from './lib/heroModel'
+import { COIN_MODEL_URL } from './lib/coinModel'
+import { WORK_MODEL_URL } from './lib/workModel'
+import { SERVICES_MODEL_URL } from './lib/servicesModel'
 import { useDesktopScaleCompensation } from './hooks/useDesktopScaleCompensation'
 import './styles/liquid-glass.css'
 import './App.css'
@@ -88,17 +92,19 @@ export default function App() {
           exit={{ opacity: 0 }}
           transition={{ duration: PAGE_FADE_DURATION, ease: 'easeOut' }}
         >
-          <Routes location={location}>
-            <Route path="/" element={<HomePage introStartRef={getIntroRef('/')} />} />
-            <Route path="/work" element={<WorkPage introStartRef={getIntroRef('/work')} />} />
-            <Route path="/news-events" element={<ServicesPage introStartRef={getIntroRef('/news-events')} />} />
-            <Route path="/services" element={<Navigate to="/news-events" replace />} />
-            <Route path="/about" element={<AboutPage introStartRef={getIntroRef('/about')} />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/director/:directorname" element={<DirectorPage />} />
-            <Route path="/spade" element={<SpadeClonePage />} />
-            <Route path="*" element={<HomePage introStartRef={getIntroRef('/')} />} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes location={location}>
+              <Route path="/" element={<HomePage introStartRef={getIntroRef('/')} />} />
+              <Route path="/work" element={<WorkPage introStartRef={getIntroRef('/work')} />} />
+              <Route path="/news-events" element={<ServicesPage introStartRef={getIntroRef('/news-events')} />} />
+              <Route path="/services" element={<Navigate to="/news-events" replace />} />
+              <Route path="/about" element={<AboutPage introStartRef={getIntroRef('/about')} />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/director/:directorname" element={<DirectorPage />} />
+              <Route path="/spade" element={<SpadeClonePage />} />
+              <Route path="*" element={<HomePage introStartRef={getIntroRef('/')} />} />
+            </Routes>
+          </Suspense>
         </motion.main>
       </AnimatePresence>
 

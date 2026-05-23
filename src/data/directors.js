@@ -6,7 +6,7 @@ export const DIRECTOR_PROFILES = {
     lastName: 'Sharma',
     role: 'Director',
     organization: 'MW Futuretech',
-    image: '/directors/aviraj-sharma-profile.png',
+    image: '/directors/aviraj-sharma-profile.webp',
     ghostHeadline: 'About The Director',
     statementLead:
       'A future-facing director shaping direction with clarity, discipline, and a bias for execution.',

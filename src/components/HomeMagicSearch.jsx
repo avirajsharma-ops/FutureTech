@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router-dom'
-import gsap from 'gsap'
 import { DIRECTOR_PROFILES } from '../data/directors'
 import { EXPERTISE_CARDS } from '../data/expertise'
 import { TEAM } from '../data/team'
@@ -174,7 +173,6 @@ export default function HomeMagicSearch() {
   const wheelAccumRef = useRef(0)
   const userActiveUntilRef = useRef(0)
   const inputRef = useRef(null)
-  const answerRef = useRef(null)
 
   const promptCount = MAGIC_SEARCH_PROMPTS.length
 
@@ -372,29 +370,6 @@ export default function HomeMagicSearch() {
   const hasResult = Boolean(answer || errorMessage)
   const isJoined = hasResult
 
-  // Ghost-text reveal: stagger each word in once the answer arrives.
-  useEffect(() => {
-    if (!hasResult) return
-    const node = answerRef.current
-    if (!node) return
-    const targets = node.querySelectorAll('.home-magic-search__ghost-word')
-    if (!targets.length) return
-    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      gsap.set(targets, { y: 0, autoAlpha: 1 })
-      return
-    }
-    const ctx = gsap.context(() => {
-      gsap.from(targets, {
-        y: 10,
-        autoAlpha: 0,
-        duration: 0.55,
-        ease: 'power4.out',
-        stagger: 0.02,
-      })
-    }, node)
-    return () => ctx.revert()
-  }, [hasResult, answer, errorMessage])
-
   const answerText = errorMessage || answer
   const structuredAnswer = useMemo(
     () => buildStructuredAnswer(answerText, Boolean(errorMessage)),
@@ -443,9 +418,9 @@ export default function HomeMagicSearch() {
             Find your next profitable product by exploring our vast database with millions of products
             and ads, using our smart search.
           </p>
-          <a className="home-magic-search__link" href="/news-events" aria-label="Learn more about Magic AI Search">
+          <Link className="home-magic-search__link" to="/news-events" aria-label="Learn more about Magic AI Search">
             <span>Learn More</span>
-          </a>
+          </Link>
         </div>
 
         <motion.div
@@ -548,7 +523,6 @@ export default function HomeMagicSearch() {
 
               {hasResult && (
                 <div
-                  ref={answerRef}
                   className="home-magic-search__answer"
                   role="status"
                   aria-live="polite"

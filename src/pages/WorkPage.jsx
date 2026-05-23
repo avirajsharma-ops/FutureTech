@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import HeroScene, { SILVER_MODEL_LIGHTING_PROPS } from '../components/HeroScene'
 import OffMenuGallery from '../components/OffMenuGallery'
-import SplineScene from '../components/SplineScene'
 import {
   WORK_MODEL_URL,
   workModelPromise,
@@ -29,11 +28,8 @@ export default function WorkPage({ introStartRef }) {
         mobileScaleMultiplier={1.42}
         mobileYOffset={0.24}
         {...SILVER_MODEL_LIGHTING_PROPS}
-        backgroundImage="/images/hero-backgrounds/hero-bg-work.png"
+        backgroundImage="/images/hero-backgrounds/hero-bg-work.webp"
       />
-      <section className="work-spline-section" aria-label="Interactive work showcase">
-        <SplineScene className="work-spline-section__viewer" />
-      </section>
       <OffMenuGallery />
     </>
   )

@@ -43,7 +43,7 @@ export default function Footer() {
         <div className="site-footer__top">
           <div className="site-footer__content">
             <Link to="/" className="site-footer__brand" aria-label="MW Futuretech home">
-              <img src="/footer/mwfuturetech-logo.png" alt="MW Futuretech logo" className="site-footer__logo" />
+              <img src="/footer/mwfuturetech-logo.png" alt="MW Futuretech logo" loading="lazy" decoding="async" className="site-footer__logo" />
               <span className="site-footer__brand-name">MW FutureTech</span>
             </Link>
 
@@ -84,7 +84,7 @@ export default function Footer() {
                       className="site-footer__link site-footer__link--connect"
                     >
                       <span className="site-footer__icon" aria-hidden="true">
-                        <img src={item.icon} alt="" />
+                        <img src={item.icon} alt="" loading="lazy" decoding="async" />
                       </span>
                       <span>{item.label}</span>
                     </a>

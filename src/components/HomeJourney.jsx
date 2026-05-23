@@ -229,7 +229,7 @@ export default function HomeJourney() {
               }}
             >
               <image
-                href="/images/satellite-bead.png"
+                href="/images/satellite-bead.webp"
                 x="-22"
                 y="-22"
                 width="44"
