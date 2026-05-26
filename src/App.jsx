@@ -20,7 +20,40 @@ const SpadeClonePage = lazy(() => import('./pages/SpadeClonePage'))
 
 const PAGE_FADE_DURATION = 0.42
 const MODEL_INTRO_ARM_DELAY = 500
-const MODEL_INTRO_PATHS = new Set(['/', '/work', '/news-events', '/about'])
+const MODEL_INTRO_PATHS = new Set(['/', '/news-events', '/about'])
+
+// Hero background images for routes that still use HeroScene.
+const HERO_IMAGE_PRELOADS = [
+  '/images/hero-backgrounds/hero-bg-home.webp',
+  '/images/hero-backgrounds/hero-bg-services.webp',
+  '/images/hero-backgrounds/hero-bg-about.webp',
+  '/images/graffiti-hero.webp',
+]
+
+function injectImagePreload(href) {
+  if (typeof document === 'undefined') return
+  if (!document.querySelector(`link[data-preload-image="${href}"]`)) {
+    const link = document.createElement('link')
+    link.rel = 'preload'
+    link.as = 'image'
+    link.href = href
+    link.fetchPriority = 'high'
+    link.dataset.preloadImage = href
+    document.head.appendChild(link)
+  }
+  // Also kick off an Image() fetch + decode so the bitmap is fully
+  // decoded and sitting in the memory cache before any route mounts it.
+  try {
+    const img = new Image()
+    img.decoding = 'async'
+    img.src = href
+    if (typeof img.decode === 'function') {
+      img.decode().catch(() => {})
+    }
+  } catch {
+    /* ignore */
+  }
+}
 
 function getModelIntroPath(pathname) {
   const normalized = pathname === '/' ? '/' : pathname.replace(/\/+$/, '')
@@ -30,18 +63,30 @@ function getModelIntroPath(pathname) {
 export default function App() {
   useDesktopScaleCompensation()
   const location = useLocation()
-  const isSpadeClone = location.pathname.replace(/\/+$/, '') === '/spade'
+  const normalizedPath = location.pathname === '/' ? '/' : location.pathname.replace(/\/+$/, '')
+  const isSpadeClone = normalizedPath === '/spade'
+  const isWorkPage = normalizedPath === '/work'
   const lenisRef = useLenisScroll({ disabled: isSpadeClone })
   const [theme] = useState('light')
   const introStartRefs = useRef(
     Object.fromEntries([...MODEL_INTRO_PATHS].map((path) => [path, { current: null }])),
   )
   const [loaderComplete, setLoaderComplete] = useState(false)
-  const modelIntroPath = isSpadeClone ? null : getModelIntroPath(location.pathname)
+  const modelIntroPath = isSpadeClone ? null : getModelIntroPath(normalizedPath)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
+
+  // Warm the browser image cache for every hero background as soon as
+  // the app mounts. We fire <link rel="preload"> + new Image() + decode()
+  // immediately so the bitmaps are already decoded and sitting in memory
+  // by the time a user clicks through to another route — no network
+  // round-trip, no decode delay, no layout shift on route mount.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    HERO_IMAGE_PRELOADS.forEach(injectImagePreload)
+  }, [])
 
   // Scroll to top whenever the route changes.
   useEffect(() => {
@@ -99,7 +144,7 @@ export default function App() {
           <Suspense fallback={null}>
             <Routes location={location}>
               <Route path="/" element={<HomePage introStartRef={getIntroRef('/')} />} />
-              <Route path="/work" element={<WorkPage introStartRef={getIntroRef('/work')} />} />
+              <Route path="/work" element={<WorkPage />} />
               <Route path="/news-events" element={<ServicesPage introStartRef={getIntroRef('/news-events')} />} />
               <Route path="/services" element={<Navigate to="/news-events" replace />} />
               <Route path="/about" element={<AboutPage introStartRef={getIntroRef('/about')} />} />
@@ -112,7 +157,7 @@ export default function App() {
         </motion.main>
       </AnimatePresence>
 
-      {!isSpadeClone && <Footer />}
+      {!isSpadeClone && !isWorkPage && <Footer />}
     </>
   )
 }

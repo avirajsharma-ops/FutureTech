@@ -433,6 +433,7 @@ export default function HomeMagicSearch() {
           <div
             ref={stageRef}
             className={`home-magic-search__prompt-stage${mode === 'input' ? ' is-input-mode' : ''}`}
+            data-lenis-prevent-wheel
           >
             {mode === 'picker' && (
               <ul className="home-magic-search__prompt-stack" aria-hidden="true">

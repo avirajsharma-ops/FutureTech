@@ -5,6 +5,12 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MW Futuretech</title>
+    <!-- Preload every hero background during HTML parse so route
+         navigations never trigger a layout shift while the image loads. -->
+    <link rel="preload" as="image" href="/images/hero-backgrounds/hero-bg-home.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/hero-backgrounds/hero-bg-services.webp" />
+    <link rel="preload" as="image" href="/images/hero-backgrounds/hero-bg-about.webp" />
+    <link rel="preload" as="image" href="/images/graffiti-hero.webp" />
   </head>
   <body>
     <div id="root"></div>

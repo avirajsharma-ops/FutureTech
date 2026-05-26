@@ -1,38 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll } from 'motion/react'
-import {
-  BarChart3,
-  Bot,
-  Cloud,
-  Code2,
-  Cpu,
-  Database,
-  Globe,
-  Server,
-  ShieldCheck,
-  Smartphone,
-  Workflow,
-  Zap,
-} from 'lucide-react'
 import './OffMenuGallery.css'
 
-const STACK_ICON_MAP = {
-  react: { label: 'React', Icon: Code2 },
-  vite: { label: 'Vite', Icon: Zap },
-  node: { label: 'Node.js', Icon: Server },
-  express: { label: 'Express', Icon: Workflow },
-  postgres: { label: 'PostgreSQL', Icon: Database },
-  mongodb: { label: 'MongoDB', Icon: Database },
-  redis: { label: 'Redis', Icon: Database },
-  aws: { label: 'AWS', Icon: Cloud },
-  gcp: { label: 'GCP', Icon: Cloud },
-  mobile: { label: 'Mobile', Icon: Smartphone },
-  ai: { label: 'AI', Icon: Bot },
-  analytics: { label: 'Analytics', Icon: BarChart3 },
-  iot: { label: 'IoT', Icon: Cpu },
-  web: { label: 'Web', Icon: Globe },
-  secure: { label: 'Security', Icon: ShieldCheck },
+const DEVICON_BASE = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
+const SIMPLE_ICON_BASE = 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons'
+
+// Real brand identities for each project stack key, pinned to verified SVG URLs.
+const BRAND_ICON_MAP = {
+  react: { label: 'React', src: `${DEVICON_BASE}/react/react-original.svg` },
+  vite: { label: 'Vite', src: `${DEVICON_BASE}/vitejs/vitejs-original.svg` },
+  node: { label: 'Node.js', src: `${DEVICON_BASE}/nodejs/nodejs-original.svg` },
+  express: { label: 'Express', src: `${DEVICON_BASE}/express/express-original.svg` },
+  postgres: { label: 'PostgreSQL', src: `${DEVICON_BASE}/postgresql/postgresql-original.svg` },
+  mongodb: { label: 'MongoDB', src: `${DEVICON_BASE}/mongodb/mongodb-original.svg` },
+  redis: { label: 'Redis', src: `${DEVICON_BASE}/redis/redis-original.svg` },
+  aws: { label: 'AWS', src: `${SIMPLE_ICON_BASE}/amazonwebservices.svg` },
+  gcp: { label: 'Google Cloud', src: `${DEVICON_BASE}/googlecloud/googlecloud-original.svg` },
+  cloud: { label: 'Cloud', src: `${DEVICON_BASE}/cloudflare/cloudflare-original.svg` },
+  mobile: { label: 'iOS', src: `${DEVICON_BASE}/apple/apple-original.svg` },
+  ai: { label: 'OpenAI', src: `${SIMPLE_ICON_BASE}/openai.svg` },
+  analytics: { label: 'Analytics', src: `${SIMPLE_ICON_BASE}/googleanalytics.svg` },
+  iot: { label: 'IoT', src: `${DEVICON_BASE}/arduino/arduino-original.svg` },
+  web: { label: 'Web', src: `${DEVICON_BASE}/html5/html5-original.svg` },
+  secure: { label: 'Cloudflare', src: `${DEVICON_BASE}/cloudflare/cloudflare-original.svg` },
 }
+
+const STACK_ARC_SPAN = 88
+const STACK_ARC_CENTER = 90 // degrees; 0 = top, 90 = right side
+const SCROLL_ROTATION_LOOPS = 3
 
 const PROJECTS = [
   {
@@ -111,7 +106,11 @@ const PROJECTS = [
 
 const TAU = Math.PI * 2
 const SPRING_STEP = 1 / 120
-const TAGLINE = 'AI-native studio building brands and web experiences for high-growth startups'
+const DEFAULT_INTRO = {
+  eyebrow: 'Selected Work',
+  title: 'AI-native studio building brands and web experiences for high-growth startups',
+  lead: 'A focused tour through recent products, systems, and interfaces built for ambitious teams.',
+}
 
 function clamp(value, min = 0, max = 1) {
   return Math.max(min, Math.min(max, value))
@@ -159,14 +158,13 @@ function wrapIndex(value, count) {
 }
 
 function useElementVisibility(ref, rootMargin = '0px') {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(() => typeof IntersectionObserver === 'undefined')
 
   useEffect(() => {
     const node = ref.current
     if (!node) return undefined
 
     if (typeof IntersectionObserver === 'undefined') {
-      setVisible(true)
       return undefined
     }
 
@@ -187,12 +185,13 @@ function getRotationTarget(progress, count) {
     return -(progress / 0.2) * TAU
   }
 
-  const step = Math.round(((progress - 0.2) / 0.8) * count) % count
-  return -TAU - step * (TAU / count)
+  const loopProgress = clamp((progress - 0.2) / 0.8)
+  const snapStep = Math.round(loopProgress * count * SCROLL_ROTATION_LOOPS)
+  return -TAU - snapStep * (TAU / count)
 }
 
-function IntroHeading({ progress }) {
-  const words = useMemo(() => TAGLINE.split(' '), [])
+function IntroHeading({ progress, eyebrow, title, lead }) {
+  const words = useMemo(() => title.split(' '), [title])
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
@@ -203,24 +202,46 @@ function IntroHeading({ progress }) {
   }, [progress])
 
   return (
-    <h2 className="offmenu-gallery__intro-heading">
-      {words.map((word, index) => (
-        <span key={`${word}-${index}`} className="offmenu-gallery__word-clip">
-          <motion.span
-            className="offmenu-gallery__word"
-            initial={{ y: '115%' }}
-            animate={{ y: visible ? '0%' : '115%' }}
-            transition={{
-              duration: 0.6,
-              delay: visible ? 0.5 + index * 0.03 : (words.length - index) * 0.02,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-          >
-            {word}&nbsp;
-          </motion.span>
-        </span>
-      ))}
-    </h2>
+    <div className="offmenu-gallery__intro-copy">
+      {eyebrow && (
+        <motion.p
+          className="offmenu-gallery__intro-eyebrow"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : -12 }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {eyebrow}
+        </motion.p>
+      )}
+      <h1 className="offmenu-gallery__intro-heading">
+        {words.map((word, index) => (
+          <span key={`${word}-${index}`} className="offmenu-gallery__word-clip">
+            <motion.span
+              className="offmenu-gallery__word"
+              initial={{ y: '115%' }}
+              animate={{ y: visible ? '0%' : '115%' }}
+              transition={{
+                duration: 0.6,
+                delay: visible ? 0.5 + index * 0.03 : (words.length - index) * 0.02,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+            >
+              {word}&nbsp;
+            </motion.span>
+          </span>
+        ))}
+      </h1>
+      {lead && (
+        <motion.p
+          className="offmenu-gallery__intro-lead"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
+          transition={{ duration: 0.55, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {lead}
+        </motion.p>
+      )}
+    </div>
   )
 }
 
@@ -237,11 +258,11 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
   const tiltYStateRef = useRef({ value: -0.6, velocity: 0 })
   const tiltXStateRef = useRef({ value: 0.5236, velocity: 0 })
   const initialZoom = progress.get() >= 0.2 ? 1 : 0
-  const zoomTweenRef = useRef({ from: 0, to: initialZoom, value: initialZoom, start: performance.now() })
+  const zoomTweenRef = useRef({ from: 0, to: initialZoom, value: initialZoom, start: 0 })
   const hoverScaleRef = useRef(new Map())
   const hoverIndexRef = useRef(null)
-  const lastTimeRef = useRef(performance.now())
-  const introStartRef = useRef(performance.now())
+  const lastTimeRef = useRef(0)
+  const introStartRef = useRef(0)
 
   useEffect(() => {
     const update = (value) => {
@@ -271,6 +292,7 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
 
     let frameId = 0
     const count = projects.length
+    const gallery = rootRef.current.closest('.offmenu-gallery')
     lastTimeRef.current = performance.now()
     introStartRef.current = performance.now()
 
@@ -305,7 +327,7 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
       rotationRef.current = rotationStateRef.current.value
       container.style.setProperty('--rotation-deg', `${(rotation * 180) / Math.PI}deg`)
       container.style.setProperty('--container-scale', `${0.5 + 0.5 * zoom}`)
-      container.style.setProperty('--zoom-offset', `calc(${zoom} * max(400px, 80cqmin))`)
+      container.style.setProperty('--zoom-offset', `calc(${zoom} * max(520px, 96cqmin))`)
       container.style.setProperty('--tilt-offset-x', `${5 * tiltY}%`)
       container.style.setProperty('--tilt-offset-y', `${-(5 * tiltX)}%`)
       container.style.setProperty('--sphere-size-scale', `${0.6 + 0.4 * zoom}`)
@@ -325,6 +347,8 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
         focusedRef.current = focusedIndex
         onFocusedIndexChange(focusedIndex)
       }
+
+      let stackHoverShift = 0
 
       spheresRef.current.forEach((element, index) => {
         if (!element) return
@@ -364,17 +388,30 @@ function SphereField({ projects, progress, onFocusedIndexChange, onProjectOpen, 
         const edgeFade = 1 - clamp((verticalAbs - 0.34) / 0.55)
         const fadedOpacity = 0.08 + 0.92 * smootherstep(edgeFade)
         const sphereOpacity = 1 - (1 - fadedOpacity) * zoom
+        // Focused sphere must always read at full opacity, even if tilt drifts it.
+        const focusWeight = 1 - smootherstep(limitedDistance)
+        const finalOpacity = Math.max(sphereOpacity, focusWeight)
+
+        if (index === focusedIndex) {
+          const scaleBeforeHover = focusScale * depthScale
+          stackHoverShift = Math.max(0, element.offsetWidth * scaleBeforeHover * (hoverScale - 1) * 1.15)
+        }
 
         element.style.setProperty('--pos-x', positionX.toString())
         element.style.setProperty('--pos-y', (-positionY).toString())
-        element.style.transform = `translate(calc(var(--pos-x) * max(400px, 80cqmin)), calc(var(--pos-y) * max(400px, 80cqmin))) scale(${focusScale * depthScale * hoverScale})`
-        element.style.opacity = sphereOpacity.toFixed(3)
+        element.style.transform = `translate(calc(var(--pos-x) * max(520px, 96cqmin)), calc(var(--pos-y) * max(520px, 96cqmin))) scale(${focusScale * depthScale * hoverScale})`
+        element.style.opacity = finalOpacity.toFixed(3)
       })
+
+      gallery?.style.setProperty('--stack-hover-shift', `${stackHoverShift.toFixed(2)}px`)
     }
 
     frameId = requestAnimationFrame(tick)
 
-    return () => cancelAnimationFrame(frameId)
+    return () => {
+      cancelAnimationFrame(frameId)
+      gallery?.style.removeProperty('--stack-hover-shift')
+    }
   }, [active, onFocusedIndexChange, projects.length, rotationRef])
 
   return (
@@ -455,32 +492,6 @@ function ProjectSidePanels({ projects, focusedIndex, settledIndex, visible }) {
               <h3 className="offmenu-gallery__meta-title">{project.title}</h3>
               <p className="offmenu-gallery__meta-description">{project.description}</p>
             </motion.aside>
-
-            <motion.aside
-              className="offmenu-gallery__meta-card offmenu-gallery__meta-card--right"
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 16 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <p className="offmenu-gallery__meta-eyebrow">Stack Used</p>
-              <ul className="offmenu-gallery__stack-list" aria-label="Project technology stack">
-                {project.stack.map((stackKey) => {
-                  const stackMeta = STACK_ICON_MAP[stackKey]
-                  if (!stackMeta) return null
-                  const Icon = stackMeta.Icon
-
-                  return (
-                    <li key={`${project.slug}-${stackKey}`} className="offmenu-gallery__stack-pill">
-                      <span className="offmenu-gallery__stack-icon" aria-hidden="true">
-                        <Icon size={14} strokeWidth={2.1} />
-                      </span>
-                      <span>{stackMeta.label}</span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </motion.aside>
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -488,9 +499,60 @@ function ProjectSidePanels({ projects, focusedIndex, settledIndex, visible }) {
   )
 }
 
+function StackArc({ stack, slug }) {
+  const items = useMemo(
+    () =>
+      stack
+        .map((key) => ({ key, ...BRAND_ICON_MAP[key] }))
+        .filter((item) => Boolean(item.src)),
+    [stack],
+  )
+  const count = items.length
+  if (count === 0) return null
+
+  return (
+    <div className="offmenu-gallery__stack-arc" aria-label="Project technology stack">
+      {items.map((item, index) => {
+        const t = count <= 1 ? 0.5 : index / (count - 1)
+        const angle = STACK_ARC_CENTER - STACK_ARC_SPAN / 2 + STACK_ARC_SPAN * t
+        return (
+          <div
+            key={`${slug}-${item.key}`}
+            className="offmenu-gallery__stack-orb"
+            style={{ '--angle': `${angle}deg` }}
+          >
+            <motion.span
+              className="offmenu-gallery__stack-orb-motion"
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{
+                duration: 0.45,
+                delay: 0.2 + index * 0.05,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+            >
+              <span className="offmenu-gallery__stack-orb-inner">
+                <img
+                  src={item.src}
+                  alt={item.label}
+                  loading="eager"
+                  decoding="async"
+                  draggable="false"
+                />
+              </span>
+              <span className="offmenu-gallery__stack-orb-label">{item.label}</span>
+            </motion.span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function OrbitalDots({ count, rotationRef, active }) {
   const rootRef = useRef(null)
-  const startRef = useRef(performance.now())
+  const startRef = useRef(0)
 
   useEffect(() => {
     const root = rootRef.current
@@ -632,7 +694,11 @@ function ProjectDetailOverlay({ activeProject, onClose }) {
   )
 }
 
-export default function OffMenuGallery() {
+export default function OffMenuGallery({
+  introEyebrow = DEFAULT_INTRO.eyebrow,
+  introTitle = DEFAULT_INTRO.title,
+  introLead = DEFAULT_INTRO.lead,
+} = {}) {
   const sectionRef = useRef(null)
   const rotationRef = useRef(0)
   const galleryActive = useElementVisibility(sectionRef)
@@ -640,7 +706,7 @@ export default function OffMenuGallery() {
   const [settledIndex, setSettledIndex] = useState(null)
   const [controlsVisible, setControlsVisible] = useState(false)
   const [activeProject, setActiveProject] = useState(null)
-  const audioCtxRef = useRef(null)
+  const audioRef = useRef(null)
   const lastTickTimeRef = useRef(0)
   const previousFocusedIndexRef = useRef(0)
   const { scrollYProgress } = useScroll({
@@ -657,22 +723,18 @@ export default function OffMenuGallery() {
     lastTickTimeRef.current = now
 
     try {
-      const AudioCtor = window.AudioContext || window.webkitAudioContext
-      if (!AudioCtor) return
-      if (!audioCtxRef.current) audioCtxRef.current = new AudioCtor()
-      const ctx = audioCtxRef.current
-      if (ctx.state === 'suspended') ctx.resume()
-
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'triangle'
-      osc.frequency.value = 1320
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.03, ctx.currentTime + 0.005)
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05)
-      osc.connect(gain).connect(ctx.destination)
-      osc.start(ctx.currentTime)
-      osc.stop(ctx.currentTime + 0.06)
+      if (!audioRef.current) {
+        const el = new Audio('/sounds/scroll-click.mp3')
+        el.preload = 'auto'
+        el.volume = 0.55
+        audioRef.current = el
+      }
+      const el = audioRef.current
+      el.currentTime = 0
+      const playPromise = el.play()
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {})
+      }
     } catch {
       // Audio is optional for scroll feedback.
     }
@@ -687,16 +749,19 @@ export default function OffMenuGallery() {
 
   useEffect(() => {
     if (!controlsVisible) {
-      setSettledIndex(null)
-      return undefined
+      const resetTimer = window.setTimeout(() => setSettledIndex(null), 0)
+      return () => window.clearTimeout(resetTimer)
     }
 
-    setSettledIndex(null)
+    const resetTimer = window.setTimeout(() => setSettledIndex(null), 0)
     const timer = window.setTimeout(() => {
       setSettledIndex(focusedIndex)
     }, 1500)
 
-    return () => window.clearTimeout(timer)
+    return () => {
+      window.clearTimeout(resetTimer)
+      window.clearTimeout(timer)
+    }
   }, [focusedIndex, controlsVisible])
 
   useEffect(() => {
@@ -712,12 +777,14 @@ export default function OffMenuGallery() {
   }, [controlsVisible, focusedIndex, playScrollTick])
 
   useEffect(() => () => {
-    if (!audioCtxRef.current) return
+    if (!audioRef.current) return
     try {
-      audioCtxRef.current.close()
+      audioRef.current.pause()
+      audioRef.current.src = ''
     } catch {
-      // ignore close failures
+      // ignore cleanup failures
     }
+    audioRef.current = null
   }, [])
 
   return (
@@ -732,7 +799,12 @@ export default function OffMenuGallery() {
           active={galleryActive}
         />
         <div className="offmenu-gallery__intro">
-          <IntroHeading progress={scrollYProgress} />
+          <IntroHeading
+            progress={scrollYProgress}
+            eyebrow={introEyebrow}
+            title={introTitle}
+            lead={introLead}
+          />
         </div>
         <ProjectSidePanels
           projects={PROJECTS}
@@ -740,6 +812,23 @@ export default function OffMenuGallery() {
           settledIndex={settledIndex}
           visible={controlsVisible}
         />
+        <AnimatePresence mode="wait">
+          {controlsVisible && settledIndex !== null && PROJECTS[settledIndex] && (
+            <motion.div
+              key={PROJECTS[settledIndex].slug}
+              className="offmenu-gallery__stack-arc-layer"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <StackArc
+                stack={PROJECTS[settledIndex].stack}
+                slug={PROJECTS[settledIndex].slug}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <OrbitalDots count={PROJECTS.length} rotationRef={rotationRef} active={galleryActive} />
       </div>
       <ProjectDetailOverlay activeProject={activeProject} onClose={() => setActiveProject(null)} />
