@@ -33,7 +33,7 @@ const PROJECTS = [
   {
     title: 'Gurujii AI Companion',
     slug: 'gurujii-ai-companion',
-    image: '/mockups/Mockup%201.webp',
+    image: '/mockup/image%206.png',
     category: 'AI avatar experience',
     description: 'A conversational spiritual guide experience with live face detection, voice interaction, and an immersive mobile-first flow.',
     details: ['Realtime AI conversation', 'Character-led voice UX', 'Mobile app interface'],
@@ -42,7 +42,7 @@ const PROJECTS = [
   {
     title: 'Poonam Sagar Wellness',
     slug: 'poonam-sagar-wellness',
-    image: '/mockups/Mockup%20Scene%204.webp',
+    image: '/mockup/Mokker-1.png',
     category: 'Health and wellness platform',
     description: 'A polished digital presence for diet consultation, appointment booking, and conversion-focused wellness discovery.',
     details: ['Responsive marketing site', 'Appointment funnel', 'Wellness brand system'],
@@ -51,7 +51,7 @@ const PROJECTS = [
   {
     title: 'Tallo Productivity OS',
     slug: 'tallo-productivity-os',
-    image: '/mockups/Mockup%20Ribbon%206.webp',
+    image: '/mockup/Mokker.png',
     category: 'AI productivity workspace',
     description: 'A sharp SaaS interface for planning, visibility, and team workflows, built around fast scanning and confident action.',
     details: ['SaaS dashboard design', 'Task workflow UX', 'AI planning surface'],
@@ -60,7 +60,7 @@ const PROJECTS = [
   {
     title: 'MedFlow HMS',
     slug: 'medflow-hms',
-    image: '/mockups/Mockup%205.webp',
+    image: '/mockup/Mokker-2.png',
     category: 'Hospital management system',
     description: 'A hospital operations platform for bed management, role-based access, revenue analytics, and real-time care coordination.',
     details: ['Operations dashboard', 'Role-based access', 'Revenue analytics'],
@@ -69,7 +69,7 @@ const PROJECTS = [
   {
     title: 'Mayalogy',
     slug: 'mayalogy',
-    image: '/mockups/Mockup%207.webp',
+    image: '/mockup/4c30308b-b0da-4205-ae74-c21492c2f6e9%201.png',
     category: 'Astrology AI assistant',
     description: 'A dual-device conversational astrology product with guided onboarding, Hindi-first content, and a premium dark interface.',
     details: ['Conversational AI', 'Native mobile flows', 'Hindi-first experience'],
@@ -78,7 +78,7 @@ const PROJECTS = [
   {
     title: 'AlgaeTree Control Center',
     slug: 'algaetree-control-center',
-    image: '/mockups/Mockup%2012.webp',
+    image: '/mockup/image%204.png',
     category: 'IoT monitoring dashboard',
     description: 'A device control center for bio-reactor monitoring, system health, and environmental controls across connected hardware.',
     details: ['IoT device controls', 'Sensor health tracking', 'Environmental automation'],
@@ -87,7 +87,7 @@ const PROJECTS = [
   {
     title: 'Canact Social Motion',
     slug: 'canact-social-motion',
-    image: '/mockups/Mockup%2013.webp',
+    image: '/mockup/Canact%20app%20screenshot%201.png',
     category: 'Social impact mobile app',
     description: 'A location-aware social product that turns community actions into measurable impact with scores, discovery, and progress loops.',
     details: ['Location-aware UX', 'Impact scoring', 'Mobile community flows'],
@@ -96,7 +96,7 @@ const PROJECTS = [
   {
     title: 'DubWala',
     slug: 'dubwala',
-    image: '/mockups/Mockup%20Scene%206.webp',
+    image: '/mockup/image%208.png',
     category: 'AI video dubbing tool',
     description: 'A creator workflow for uploading video or audio, selecting target languages, and generating multilingual voice output.',
     details: ['AI dubbing workflow', 'Multilingual selection', 'Creator upload system'],
